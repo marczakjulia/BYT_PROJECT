@@ -8,6 +8,8 @@ public class Seat
     private string _code;
     private SeatType _type;
     
+    private Auditorium _auditorium;
+    
     // 92A, 05J, 96Z
     private static readonly Regex SeatCodeSyntax = new Regex(@"^[0-9]{2}[A-Z]$", RegexOptions.Compiled);
 
@@ -36,14 +38,26 @@ public class Seat
                 throw new ArgumentException("Invalid seat type.");
         }
     }
+    
+    public Auditorium Auditorium
+    {
+        get => _auditorium;
+        set
+        {
+            if (value == null)
+                throw new ArgumentException("Seat must belong to an auditorium.");
+            _auditorium = value;
+        }
+    }
 
-    public Seat(string code, SeatType type)
+    public Seat(string code, SeatType type, Auditorium auditorium)
     {
         Code = code;
         Type = type;
+        Auditorium = auditorium;
     }
 
-    public static Seat GetSeatByCode(List<Seat> seats, string code)
+    public static Seat? GetSeatByCode(List<Seat?> seats, string code)
     {
         foreach (var seat in seats)
         {
