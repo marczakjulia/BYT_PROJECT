@@ -57,6 +57,7 @@ public class ReviewPage
     public void AddReview()
     {
         //TODO: I do not think we reallyneed that function, instead of that we can create additional helper class like ReviewManager that has dictionary<movieTitle, List<reviews>> and we can implement methods such as GetReviewsByMovieTtile, getAverageRating,AddReview.
+        //i like it, we'll see how we will have to implement the serialization and the associations -julia
     }
     
     // public static List<ReviewPage> GetAllReviewsByNameAndSurname(List<ReviewPage> reviews, string name, string surname)
