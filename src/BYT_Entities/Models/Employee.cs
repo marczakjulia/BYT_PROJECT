@@ -4,6 +4,7 @@ namespace BYT_Entities.Models;
 
 public class Employee
 {
+    public int Id { get; set; }
     private string _name;
     private string _surname;
     private string _pesel;
@@ -92,9 +93,10 @@ public class Employee
         }
     }
 
-    protected Employee(string name, string surname, string pesel, string email,
+    public Employee(int id, string name, string surname, string pesel, string email,
         DateTime dayOfBirth, DateTime hireDate, double salary)
     {
+        Id = id;
         Name = name;
         Surname = surname;
         PESEL = pesel;

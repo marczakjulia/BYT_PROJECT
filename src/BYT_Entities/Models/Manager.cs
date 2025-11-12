@@ -2,6 +2,7 @@
 
 public class Manager
 {
+    public int Id { get; set; }
     private string _department;
     private double _baseSalary;
     private double _bonus;
@@ -43,8 +44,9 @@ public class Manager
         }
     }
 
-    public Manager(string department, double baseSalary, double bonus)
+    public Manager(int id, string department, double baseSalary, double bonus)
     {
+        Id = id;
         Department = department;
         BaseSalary = baseSalary;
         Bonus = bonus;

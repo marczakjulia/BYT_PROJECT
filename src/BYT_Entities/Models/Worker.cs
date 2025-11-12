@@ -4,6 +4,7 @@ namespace BYT_Entities.Models;
 
 public class Worker
 {
+    public int Id { get; set; }
     private ShiftType _shift;
     private WorkType _typeOfWork;
     private int _hoursWorked;
@@ -35,11 +36,17 @@ public class Worker
     public double HourlyRate
     {
         get => _hourlyRate;
-        set => _hourlyRate = value;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentOutOfRangeException(nameof(HourlyRate), "Hourly rate must be greater than zero.");
+            _hourlyRate = value;
+        }
     }
     
-    public Worker(ShiftType shift, WorkType typeOfWork, double hourlyRate)
+    public Worker(int id, ShiftType shift, WorkType typeOfWork, double hourlyRate)
     {
+        Id = id;
         Shift = shift;
         TypeOfWork = typeOfWork;
         HoursWorked = 0;

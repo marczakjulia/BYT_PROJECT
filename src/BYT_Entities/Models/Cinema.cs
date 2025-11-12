@@ -2,6 +2,7 @@
 
 public class Cinema
 {
+    public int Id { get; set; }
     private string _name;
     private string _address;
     private string _phone;
@@ -63,8 +64,9 @@ public class Cinema
         }
     }
     
-    public Cinema(string name, string address, string phone, string email, string openingHours)
+    public Cinema(int id, string name, string address, string phone, string email, string openingHours)
     {
+        Id = id;
         Name = name;
         Address = address;
         Phone = phone;
