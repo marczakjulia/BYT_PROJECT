@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYT_Entities", "src\BYT_Entities\BYT_Entities.csproj", "{725F0CBB-B48C-4570-99F4-52C9E33578B5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BYT_tests", "test\BYT_tests\BYT_tests.csproj", "{C83380BC-8EB7-4F60-991E-7D2729912262}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{725F0CBB-B48C-4570-99F4-52C9E33578B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{725F0CBB-B48C-4570-99F4-52C9E33578B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{725F0CBB-B48C-4570-99F4-52C9E33578B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C83380BC-8EB7-4F60-991E-7D2729912262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C83380BC-8EB7-4F60-991E-7D2729912262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C83380BC-8EB7-4F60-991E-7D2729912262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C83380BC-8EB7-4F60-991E-7D2729912262}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -10,7 +10,7 @@ public class Movie
     private int _length;
     private string _description;
     private string _director;
-    public AgeRestrictionType AgeRestriction { get; set; }
+    public AgeRestrictionType? AgeRestriction { get; set; }
 
     public string Title
     {
@@ -63,7 +63,7 @@ public class Movie
         }
     }
     
-    public Movie(int id, string title, string countryOfOrigin, int length, string description, string director, AgeRestrictionType ageRestriction)
+    public Movie(int id, string title, string countryOfOrigin, int length, string description, string director, AgeRestrictionType? ageRestriction = null)
     {
         Id = id;
         Title = title;
