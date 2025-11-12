@@ -2,8 +2,8 @@
 
 public enum ScreeningFormat
 {
-    Planned = 0,
-    Running = 1,
-    Finished = 2,
-    Canceled = 3,
+    _2D = 0,
+    _3D =1,
+    _4DX =2,
+    IMAX = 3
 }

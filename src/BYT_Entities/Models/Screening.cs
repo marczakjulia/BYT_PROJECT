@@ -4,7 +4,7 @@ namespace BYT_Entities.Models;
 
 public class Screening
 {
-    // private Movie _movie;
+    private Movie _movie;
     public int Id { get; set; }
     private Auditorium _auditorium;
     private DateTime _date;
@@ -14,16 +14,16 @@ public class Screening
     private ScreeningStatus _status;
     private Dictionary<string, Ticket> _ticketsBySeatCode;
 
-    // public Movie Movie
-    // {
-    //     get => _movie;
-    //     set
-    //     {
-    //         if (value == null)
-    //             throw new ArgumentNullException(nameof(Movie), "Movie cannot be null.");
-    //         _movie = value;
-    //     }
-    // }
+    public Movie Movie
+    {
+        get => _movie;
+        set
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(Movie), "Movie cannot be null.");
+            _movie = value;
+        }
+    }
 
     public Auditorium Auditorium
     {
@@ -98,18 +98,18 @@ public class Screening
     //read-only
     public Dictionary<string, Ticket> TicketsBySeatCode => _ticketsBySeatCode;
 
-    // public Screening(int id, Movie movie, Auditorium auditorium, DateTime date, TimeSpan startTime, ScreeningFormat format, ScreeningVersion version)
-    // {
-    //     Id = id;
-    //     Movie = movie;
-    //     Auditorium = auditorium;
-    //     Date = date;
-    //     StartTime = startTime;
-    //     Format = format;
-    //     Version = version;
-    //     Status = ScreeningStatus.Planned;
-    //     _ticketsBySeatCode = new Dictionary<string, Ticket>();
-    // }
+    public Screening(int id, Movie movie, Auditorium auditorium, DateTime date, TimeSpan startTime, ScreeningFormat format, ScreeningVersion version)
+    {
+        Id = id;
+        Movie = movie;
+        Auditorium = auditorium;
+        Date = date;
+        StartTime = startTime;
+        Format = format;
+        Version = version;
+        Status = ScreeningStatus.Planned;
+        _ticketsBySeatCode = new Dictionary<string, Ticket>();
+    }
 
     public void CreateScreening(decimal price)
     {
@@ -176,11 +176,11 @@ public class Screening
     }
 
     
-    // public static List<Screening> GetAllScreeningsForAMovie(List<Screening> screenings, Movie movie)
-    // {
-    //     if (movie == null)
-    //         throw new ArgumentException("Movie cannot be null.");
-    //
-    //     return screenings.Where(s => s.Movie == movie).ToList();
-    // }
+    public static List<Screening> GetAllScreeningsForAMovie(List<Screening> screenings, Movie movie)
+    {
+        if (movie == null)
+            throw new ArgumentException("Movie cannot be null.");
+    
+        return screenings.Where(s => s.Movie == movie).ToList();
+    }
 }

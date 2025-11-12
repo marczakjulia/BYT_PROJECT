@@ -1,6 +1,6 @@
 ﻿namespace BYT_Entities.Enums;
 
-public enum ScreenType
+public enum AuditoriumScreenType
 {
     _2D = 0,
     _3D =1,
