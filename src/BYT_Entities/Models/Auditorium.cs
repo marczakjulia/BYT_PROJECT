@@ -4,6 +4,7 @@ namespace BYT_Entities.Models;
 
 public class Auditorium
 {
+    public int Id { get; set; }
     private string _name;
     private ScreenType _screenType;
     private AuditoriumSoundsSystem _soundSystem;
@@ -53,12 +54,13 @@ public class Auditorium
         }
     }
     
-    public Auditorium(string name, ScreenType screenType, AuditoriumSoundsSystem soundSystem, List<Seat> seats)
+    public Auditorium(string name, ScreenType screenType, AuditoriumSoundsSystem soundSystem, List<Seat> seats, int id)
     {
         Name = name;
         ScreenType = screenType;
         SoundSystem = soundSystem;
         Seats = seats;
+        Id = id;
     }
 
     // public bool IsAvailable(DateTime date, TimeSpan startTime, TimeSpan movieDuration, List<Screening> screenings)

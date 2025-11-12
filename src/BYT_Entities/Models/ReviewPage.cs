@@ -2,6 +2,7 @@
 
 public class ReviewPage
 {
+    public int Id { get; set; }
     private string _name;
     private string _surname;
     private int _rate;
@@ -46,11 +47,12 @@ public class ReviewPage
         set => _comment = value; 
     }
     
-    public ReviewPage(string name, string surname, int rate, string? comment = null)
+    public ReviewPage(string name, string surname, int rate, int id, string? comment = null)
     {
         Name = name;
         Surname = surname;
         Rate = rate;
+        Id = id;
         Comment = comment;
     }
 

@@ -5,6 +5,7 @@ namespace BYT_Entities.Models;
 
 public class Seat
 {
+    public int Id { get; set; }
     private string _code;
     private SeatType _type;
     
@@ -50,11 +51,12 @@ public class Seat
         }
     }
 
-    public Seat(string code, SeatType type, Auditorium auditorium)
+    public Seat(string code, SeatType type, Auditorium auditorium, int id)
     {
         Code = code;
         Type = type;
         Auditorium = auditorium;
+        Id = id;
     }
 
     public static Seat? GetSeatByCode(List<Seat?> seats, string code)

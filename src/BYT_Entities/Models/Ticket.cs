@@ -5,6 +5,7 @@ namespace BYT_Entities.Models;
 
 public class Ticket
 {
+    public int Id { get; set; }
     private decimal _price;
     private TicketStatus _status;
     private string? _reasonOfRefundOrExpiration;
@@ -57,15 +58,16 @@ public class Ticket
     }
     
     //initial step
-    public Ticket(decimal price)
+    public Ticket(decimal price, int id)
     {
         Price = price;
+        Id = id;
         Status = TicketStatus.Available;
         PaymentType = TicketPaymentType.None;
         ReasonOfRefundOrExpiration = null;
     }
 
-    public Ticket(decimal price, TicketStatus status, TicketPaymentType paymentType, string? reason = null)
+    public Ticket(decimal price, TicketStatus status, TicketPaymentType paymentType, int id, string? reason = null)
     {
         Price = price;
         Status = status;
@@ -76,6 +78,7 @@ public class Ticket
 
         ReasonOfRefundOrExpiration = reason;
         PaymentType = paymentType;
+        Id = id;
     }
 
     public void SellTicket(TicketPaymentType paymentType)

@@ -5,6 +5,7 @@ namespace BYT_Entities.Models;
 public class Screening
 {
     // private Movie _movie;
+    public int Id { get; set; }
     private Auditorium _auditorium;
     private DateTime _date;
     private TimeSpan _startTime;
@@ -38,13 +39,27 @@ public class Screening
     public DateTime Date
     {
         get => _date;
-        set => _date = value;
+        set
+        {
+            // we cannot set a screening date in the past
+            if (value < DateTime.Now.Date)
+                throw new ArgumentException("Screening date cannot be set in the past.");
+
+            _date = value;
+        }
     }
 
     public TimeSpan StartTime
     {
         get => _startTime;
-        set => _startTime = value;
+        set
+        {
+            //same start time should be in the future
+            if (Date.Date == DateTime.Now.Date && value < DateTime.Now.TimeOfDay)
+                throw new ArgumentException("Start time cannot be in the past for today's date.");
+
+            _startTime = value;
+        }
     }
 
     public ScreeningFormat Format
@@ -80,10 +95,12 @@ public class Screening
         }
     }
 
+    //read-only
     public Dictionary<string, Ticket> TicketsBySeatCode => _ticketsBySeatCode;
 
-    // public Screening(Movie movie, Auditorium auditorium, DateTime date, TimeSpan startTime, ScreeningFormat format, ScreeningVersion version)
+    // public Screening(int id, Movie movie, Auditorium auditorium, DateTime date, TimeSpan startTime, ScreeningFormat format, ScreeningVersion version)
     // {
+    //     Id = id;
     //     Movie = movie;
     //     Auditorium = auditorium;
     //     Date = date;
@@ -98,9 +115,15 @@ public class Screening
     {
         if (_ticketsBySeatCode.Count > 0)
             throw new InvalidOperationException("Tickets have already been created");
-        
+
+        int ticketId = 1;
+
         foreach (var seat in Auditorium.Seats)
-            _ticketsBySeatCode.Add(seat.Code, new Ticket(price));
+        { 
+            _ticketsBySeatCode.Add(seat.Code, new Ticket(price, ticketId));
+            ticketId++;
+        }
+
         
         Status = ScreeningStatus.Planned;
     }
