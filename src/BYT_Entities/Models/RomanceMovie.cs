@@ -1,10 +1,14 @@
-namespace BYT_Entities.Models;
+using System.Xml;
+using System.Xml.Serialization;
 
+namespace BYT_Entities.Models;
+[Serializable]
 public class RomanceMovie
 {
     public int Id { get; set; }
     private int _intensity;
     private List<string>? _inappropriateScenes;
+    private static List<RomanceMovie> RomanceMovies = new List<RomanceMovie>();
     public int Intensity
     {
         get => _intensity;
@@ -31,7 +35,60 @@ public class RomanceMovie
         Id = id;
         Intensity = intensity;
         InappropriateScenes = inappropriateScenes;
+        AddRomanceMovie(this);
     }
 
     public RomanceMovie() { }
+       
+    private static void AddRomanceMovie(RomanceMovie romance)
+    {
+        if (romance == null)
+        {
+            throw new ArgumentException("Romance cannot be null");
+        }
+        RomanceMovies.Add(romance);
+    }
+
+    public static void Save(string path = "romance.xml")
+    {
+        StreamWriter file = File.CreateText(path);
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<RomanceMovie>));
+        using (XmlTextWriter writer = new XmlTextWriter(file))
+        {
+            xmlSerializer.Serialize(writer, RomanceMovies);
+        }
+    }
+
+    public static bool Load(string path = "romance.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            RomanceMovies.Clear();
+            return false;
+        }
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<RomanceMovie>));
+        using (XmlTextReader reader = new XmlTextReader(file))
+        {
+            try
+            {
+                RomanceMovies = (List<RomanceMovie>)xmlSerializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                RomanceMovies.Clear();
+                return false;
+            }
+            catch (Exception)
+            {
+                RomanceMovies.Clear();
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -1,7 +1,10 @@
+using System.Xml;
+using System.Xml.Serialization;
 using BYT_Entities.Enums;
 
 namespace BYT_Entities.Models;
 
+[Serializable]
 public class Movie
 {
     public int Id { get; set; }
@@ -10,6 +13,7 @@ public class Movie
     private int _length;
     private string _description;
     private string _director;
+    private static List<Movie> MoviesList = new List<Movie>();
     public AgeRestrictionType? AgeRestriction { get; set; }
 
     public string Title
@@ -72,9 +76,61 @@ public class Movie
         Description = description;
         Director = director;
         AgeRestriction = ageRestriction;
+        AddMovie(this);
     }
 
     public Movie() { }
+    private static void AddMovie(Movie movie)
+    {
+        if (movie == null)
+        {
+            throw new ArgumentException("movie cannot be null");
+        }
+        MoviesList.Add(movie);
+    }
+
+    public static void Save(string path = "movie.xml")
+    {
+        StreamWriter file = File.CreateText(path);
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Movie>));
+        using (XmlTextWriter writer = new XmlTextWriter(file))
+        {
+            xmlSerializer.Serialize(writer, MoviesList);
+        }
+    }
+
+    public static bool Load(string path = "movie.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            MoviesList.Clear();
+            return false;
+        }
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Movie>));
+        using (XmlTextReader reader = new XmlTextReader(file))
+        {
+            try
+            {
+                MoviesList = (List<Movie>)xmlSerializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                MoviesList.Clear();
+                return false;
+            }
+            catch (Exception)
+            {
+                MoviesList.Clear();
+                return false;
+            }
+        }
+        return true;
+    }
     
     /*
     for later to implement when we do associations, since they both need to connect to review 
