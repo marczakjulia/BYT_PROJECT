@@ -65,7 +65,7 @@ public class Auditorium
     
     public List<Seat> Seats
     {
-        get => new(_seats);
+        get => _seats;
         set
         {
             if (value == null)
