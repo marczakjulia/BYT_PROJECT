@@ -62,10 +62,10 @@ public class Auditorium
             _soundSystem = value;
         }
     }
-
+    
     public List<Seat> Seats
     {
-        get => new(_seats);
+        get => _seats;
         set
         {
             if (value == null)

@@ -85,4 +85,5 @@ public class AuditoriumTests
         _auditorium.RemoveSeat(seatToRemove);
         Assert.That(!_auditorium.Seats.Contains(seatToRemove));
     }
+
 }
