@@ -1,0 +1,1 @@
+We have implemented all the attributes in all the classes that were possible, similar with functions. Only things that werent implemented are due to the fact that it requires inheritance or association. The extent is in most classes as it was shown on the slides. There are multiple tests for most of the classes as of right now 
