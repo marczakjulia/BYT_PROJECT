@@ -1,7 +1,10 @@
-﻿using BYT_Entities.Enums;
+﻿using System.Xml;
+using System.Xml.Serialization;
+using BYT_Entities.Enums;
 
 namespace BYT_Entities.Models;
 
+[Serializable]
 public class Employee
 {
     public int Id { get; set; }
@@ -12,6 +15,24 @@ public class Employee
     private double _salary;
     private DateTime _dayOfBirth;
     private DateTime _hireDate;
+    private static List<Employee> employeesList = new List<Employee>();
+    
+    public static List<Employee> GetEmployees()
+    {
+        return new List<Employee>(employeesList);
+    }
+    
+    public static void ClearEmployees()
+    {
+        employeesList.Clear();
+    }
+    private static void AddEmployee(Employee employee)
+    {
+        if (employee == null)
+            throw new ArgumentException("Employee cannot be null.");
+
+        employeesList.Add(employee);
+    }
     
     public string Name
     {
@@ -78,9 +99,9 @@ public class Employee
             _hireDate = value;
         }
     }
-    public DateTime? FireDate { get; private set; }
+    public DateTime? FireDate { get; set; }
 
-    public EmployeeStatus Status { get; private set; } = EmployeeStatus.Working;
+    public EmployeeStatus Status { get; set; } = EmployeeStatus.Working;
 
     public double Salary
     {
@@ -104,6 +125,51 @@ public class Employee
         DayOfBirth = dayOfBirth;
         HireDate = hireDate;
         Salary = salary;
+        AddEmployee(this);
     }
+    public Employee() { }
+    public static void Save(string path = "employee.xml")
+    {
+        StreamWriter file = File.CreateText(path);
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Employee>));
+        using (XmlTextWriter writer = new XmlTextWriter(file))
+        {
+            xmlSerializer.Serialize(writer, employeesList);
+        }
+    }
+
+    public static bool Load(string path = "employee.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            employeesList.Clear();
+            return false;
+        }
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Employee>));
+        using (XmlTextReader reader = new XmlTextReader(file))
+        {
+            try
+            {
+                employeesList = (List<Employee>)xmlSerializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                employeesList.Clear();
+                return false;
+            }
+            catch (Exception)
+            {
+                employeesList.Clear();
+                return false;
+            }
+        }
+        return true;
+    }
+    
 
 }

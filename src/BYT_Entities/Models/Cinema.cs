@@ -1,5 +1,9 @@
-﻿namespace BYT_Entities.Models;
+﻿using System.Xml;
+using System.Xml.Serialization;
 
+namespace BYT_Entities.Models;
+
+[Serializable]
 public class Cinema
 {
     public int Id { get; set; }
@@ -8,6 +12,23 @@ public class Cinema
     private string _phone;
     private string _email;
     private string _openingHours;
+    private static List<Cinema> cinemasList = new List<Cinema>();
+    public static List<Cinema> GetCinemas()
+    {
+        return new List<Cinema>(cinemasList);
+    }
+    
+    public static void ClearCinemas()
+    {
+        cinemasList.Clear();
+    }
+    private static void AddCinema(Cinema cinema)
+    {
+        if (cinema == null)
+            throw new ArgumentException("Cinema cannot be null.");
+
+        cinemasList.Add(cinema);
+    }
     
     public string Name
     {
@@ -72,8 +93,54 @@ public class Cinema
         Phone = phone;
         Email = email;
         OpeningHours = openingHours;
+        AddCinema(this);
     }
     
     public void CalculateTotalEarnings(){}
+    
+    public Cinema() { }
+    
+    public static void Save(string path = "cinema.xml")
+    {
+        StreamWriter file = File.CreateText(path);
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Cinema>));
+        using (XmlTextWriter writer = new XmlTextWriter(file))
+        {
+            xmlSerializer.Serialize(writer, cinemasList);
+        }
+    }
+
+    public static bool Load(string path = "cinema.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            cinemasList.Clear();
+            return false;
+        }
+        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Cinema>));
+        using (XmlTextReader reader = new XmlTextReader(file))
+        {
+            try
+            {
+                cinemasList = (List<Cinema>)xmlSerializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                cinemasList.Clear();
+                return false;
+            }
+            catch (Exception)
+            {
+                cinemasList.Clear();
+                return false;
+            }
+        }
+        return true;
+    }
     
 }

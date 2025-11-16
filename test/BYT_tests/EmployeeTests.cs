@@ -4,6 +4,12 @@ namespace TestByt;
 
 public class EmployeeTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        Employee.ClearEmployees();
+    }
+    
     [Test]
     public void ShouldThrowException_WhenNameIsEmpty()
     {
@@ -27,4 +33,59 @@ public class EmployeeTests
         Assert.DoesNotThrow(() => new Employee(4, "Anna", "Smuga", "98765432109", "anna@success.com", new DateTime(1992, 3, 12), DateTime.Now.AddDays(-100), 5000));
     }
     
-}
+    [Test]
+        public void Extent_ShouldStoreCreatedEmployees()
+        {
+            var e1 = new Employee(1, "John", "Doe", "12345678901", "john@test.com",
+                new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000);
+            var e2 = new Employee(2, "Jane", "Smith", "98765432109", "jane@test.com",
+                new DateTime(1992, 5, 5), new DateTime(2021, 2, 2), 3500);
+
+            var extent = Employee.GetEmployees();
+
+            Assert.AreEqual(2, extent.Count);
+            Assert.Contains(e1, extent);
+            Assert.Contains(e2, extent);
+        }
+
+        [Test]
+        public void Encapsulation_ShouldPreventDirectModificationOfPrivateFields()
+        {
+            var employee = new Employee(1, "John", "Doe", "12345678901", "john@test.com",
+                new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000);
+
+            var nameField = typeof(Employee).GetField("_name", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            nameField.SetValue(employee, "TamperedName");
+
+            var extent = Employee.GetEmployees();
+
+            Assert.AreEqual("TamperedName", extent[0].Name);
+        }
+
+        [Test]
+        public void SaveLoad_ShouldPersistExtentCorrectly()
+        {
+            var path = "test_employee.xml";
+
+            var e1 = new Employee(1, "John", "Doe", "12345678901", "john@test.com",
+                new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000);
+            var e2 = new Employee(2, "Jane", "Smith", "98765432109", "jane@test.com",
+                new DateTime(1992, 5, 5), new DateTime(2021, 2, 2), 3500);
+
+            Employee.Save(path);
+
+            Employee.ClearEmployees();
+            Assert.AreEqual(0, Employee.GetEmployees().Count);
+
+            var loaded = Employee.Load(path);
+            var extent = Employee.GetEmployees();
+
+            Assert.IsTrue(loaded);
+            Assert.AreEqual(2, extent.Count);
+            Assert.AreEqual("John", extent[0].Name);
+            Assert.AreEqual("Jane", extent[1].Name);
+
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
