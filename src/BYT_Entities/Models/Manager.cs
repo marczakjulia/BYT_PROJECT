@@ -10,6 +10,7 @@ public class Manager
     private string _department;
     private double _baseSalary;
     private double _bonus;
+    private double _bonusPercentage;
     public static double MaxSalaryBonus { get; } = 0.35;
     private static List<Manager> managersList = new List<Manager>();
     
@@ -41,6 +42,18 @@ public class Manager
             _department = value.Trim();
         }
     }
+    
+    public double BonusPercentage
+    {
+        get => _bonusPercentage;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentOutOfRangeException(nameof(BonusPercentage), "Bonus percentage must be greater than 0.");
+            _baseSalary = value;
+        }
+    }
+
 
     public double BaseSalary
     {
@@ -58,27 +71,30 @@ public class Manager
         get => _bonus;
         set
         {
-            if (value < 0)
+            double bonus;
+            if (_bonusPercentage > MaxSalaryBonus)
+            {
+                Console.WriteLine("The bonus percentage is too large, it's reduced to the maximum.");
+                bonus = BaseSalary * _bonusPercentage;
+            }
+            else
+            {
+                bonus = BaseSalary * _bonusPercentage;
+            }
+            if (bonus < 0)
                 throw new ArgumentOutOfRangeException(nameof(Bonus), "Bonus cannot be negative.");
-            if (value > MaxSalaryBonus)
-                throw new ArgumentOutOfRangeException(nameof(Bonus),
-                    $"Bonus cannot exceed max bonus.");
             _bonus = value;
         }
     }
 
-    public Manager(int id, string department, double baseSalary, double bonus)
+    public Manager(int id, string department, double baseSalary, double bonus, double bonusPercentage)
     {
         Id = id;
         Department = department;
         BaseSalary = baseSalary;
         Bonus = bonus;
+        BonusPercentage = bonusPercentage;
         AddManager(this);
-    }
-
-    public double CalculateBonusAmount()
-    {
-        return BaseSalary * Bonus;
     }
     
     public static void Save(string path = "manager.xml")
