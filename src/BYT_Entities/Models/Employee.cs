@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
+using BYT_Entities.Complex;
 using BYT_Entities.Enums;
 
 namespace BYT_Entities.Models;
@@ -15,6 +16,7 @@ public class Employee
     private double _salary;
     private DateTime _dayOfBirth;
     private DateTime _hireDate;
+    private Address _address;
     private static List<Employee> employeesList = new List<Employee>();
     
     public static List<Employee> GetEmployees()
@@ -89,6 +91,17 @@ public class Employee
         }
     }
 
+    public Address Address
+    {
+        get => _address;
+        set
+        {
+            if (value == null)
+                throw new ArgumentException("address cannot be null");
+
+            _address = value;
+        }
+    }
     public DateTime HireDate
     {
         get => _hireDate;
@@ -115,7 +128,7 @@ public class Employee
     }
 
     public Employee(int id, string name, string surname, string pesel, string email,
-        DateTime dayOfBirth, DateTime hireDate, double salary)
+        DateTime dayOfBirth, DateTime hireDate, double salary, Address address, EmployeeStatus status)
     {
         Id = id;
         Name = name;
@@ -125,6 +138,8 @@ public class Employee
         DayOfBirth = dayOfBirth;
         HireDate = hireDate;
         Salary = salary;
+        Status = status;
+        Address = address;
         AddEmployee(this);
     }
     public Employee() { }
