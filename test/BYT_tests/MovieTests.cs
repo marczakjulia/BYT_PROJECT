@@ -6,6 +6,11 @@ namespace TestByt;
  //for now i am using ids in those tests - i dont know how we plan on generating them hence just to keep it "simple"
  public class MovieTests
  {
+     [SetUp]
+     public void SetUp()
+     {
+         Movie.ClearMovies();
+     }
      [Test]
      public void MovieTitleIsEmpty()
      {
