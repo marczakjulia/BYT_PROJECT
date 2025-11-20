@@ -22,6 +22,14 @@ public class HorrorMovie
         }
     }
 
+    public static List<HorrorMovie> GetHorrorMoviesMovies()
+    {
+        return new List<HorrorMovie>(HorrorMoviesList);
+    }
+    public static void ClearHorrorMovies()
+    {
+        HorrorMoviesList.Clear();
+    }
     public List<string>? JumpScares
     {
         get => _jumpScares;

@@ -42,6 +42,14 @@ public class DirectorCut
             _changesDescription = value.Trim();
         }
     }
+    public static List<DirectorCut> GetDirectorCutsMovies()
+    {
+        return new List<DirectorCut>(DirectorsCutList);
+    }
+    public static void ClearDirectorCutsMovies()
+    {
+        DirectorsCutList.Clear();
+    }
     public DirectorCut(int id, int extraMinutes, string changesDescription, string? alternativeEnding = null)
     {
         Id = id;

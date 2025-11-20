@@ -91,4 +91,12 @@ public class RomanceMovie
         }
         return true;
     }
+    public static List<RomanceMovie> GetRomanceMovies()
+    {
+        return new List<RomanceMovie>(RomanceMovies);
+    }
+    public static void ClearRomanceMovies()
+    {
+        RomanceMovies.Clear();
+    }
 }

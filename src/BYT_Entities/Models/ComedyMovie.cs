@@ -19,6 +19,14 @@ public class ComedyMovie
             _humorType = value.Trim();
         }
     }
+    public static List<ComedyMovie> GetComedyMovies()
+    {
+        return new List<ComedyMovie>(ComedyMoviesList);
+    }
+    public static void ClearComedyMovies()
+    {
+        ComedyMoviesList.Clear();
+    }
     public ComedyMovie(int id, string humorType)
     {
         Id = id;

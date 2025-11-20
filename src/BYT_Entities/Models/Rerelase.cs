@@ -94,4 +94,12 @@ public class Rerelease
         }
         return true;
     }
+    public static List<Rerelease> GetRereleasesMovies()
+    {
+        return new List<Rerelease>(Rereleases);
+    }
+    public static void ClearReleaseMovies()
+    {
+        Rereleases.Clear();
+    }
 }

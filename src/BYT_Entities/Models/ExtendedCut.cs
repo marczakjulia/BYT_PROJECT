@@ -74,6 +74,14 @@ public class ExtendedCut
         }
     }
 
+    public static List<ExtendedCut> GetExtendedCutMovies()
+    {
+        return new List<ExtendedCut>(ExtendedCutsList);
+    }
+    public static void ClearExtendedCutMovies()
+    {
+        ExtendedCutsList.Clear();
+    }
     public static bool Load(string path = "extendedcut.xml")
     {
         StreamReader file;

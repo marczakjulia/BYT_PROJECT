@@ -1,3 +1,4 @@
+using System.Reflection;
 using BYT_Entities.Enums;
 using BYT_Entities.Models;
 
@@ -65,4 +66,64 @@ namespace TestByt;
                  "i will never stop asking for extra points we all need a 5 from this subject", " Me   ");
          });
      }
- }
+      [Test]
+        public void Extent_ShouldStoreCreatedMovies()
+        {
+            var movie1= new Movie(1, "amazing new title      ", "Polska", 55555,
+                "i will never stop asking for extra points we all need a 5 from this subject", " Me   ");
+            var movie2 =  new Movie(1, "   title   ", "Poland", 111111, "a very nice amazing movie please give us max points ",
+                "Julia Marczak", AgeRestrictionType.PG13);
+
+            var extent = Movie.GetMovies();
+
+            Assert.AreEqual(2, extent.Count);
+            Assert.Contains(movie1, extent);
+            Assert.Contains(movie2, extent);
+        }
+        
+        [Test]
+        public void Encapsulation_ShouldPreventDirectModificationOfPrivateFields()
+        {
+            var movie = new Movie(1, "Original title", "Poland", 120,
+                "Some description", "Some Director");
+
+            var titleField = typeof(Movie)
+                .GetField("_title", BindingFlags.NonPublic | BindingFlags.Instance);
+            titleField.SetValue(movie, "TamperedTitle");
+
+            var extent = Movie.GetMovies();
+            Assert.AreEqual("TamperedTitle", extent[0].Title);
+        }
+
+        [Test]
+        public void SaveLoad_ShouldPersistExtentCorrectly()
+        {
+            var path = "test_movie.xml";
+            if (File.Exists(path))
+                File.Delete(path);
+
+            var m1 = new Movie(1, "movie uno", "pollaaand", 100,
+                "we all have bsi tomorrow so it couuld be possible the documentation will be bad", "idk");
+            var m2 = new Movie(2, "movie dos", "jej", 120,
+                "second ", "not sure", AgeRestrictionType.PG13);
+
+            Movie.Save(path);
+
+            // Clear current extent
+            Movie.ClearMovies();
+            Assert.AreEqual(0, Movie.GetMovies().Count);
+
+            // Load from file
+            var loaded = Movie.Load(path);
+            var extent = Movie.GetMovies();
+
+            Assert.IsTrue(loaded);
+            Assert.AreEqual(2, extent.Count);
+            Assert.AreEqual("movie uno", extent[0].Title);
+            Assert.AreEqual("movie dos", extent[1].Title);
+
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+ 

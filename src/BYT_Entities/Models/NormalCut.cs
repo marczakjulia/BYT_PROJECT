@@ -64,5 +64,12 @@ public class NormalCut
         }
         return true;
     }
-
+    public static List<NormalCut> GetNormalCutsMovies()
+    {
+        return new List<NormalCut>(NormalCuts);
+    }
+    public static void ClearNormalCutsMovies()
+    {
+        NormalCuts.Clear();
+    }
 }

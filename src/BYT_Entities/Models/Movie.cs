@@ -15,7 +15,14 @@ public class Movie
     private string _director;
     private static List<Movie> MoviesList = new List<Movie>();
     public AgeRestrictionType? AgeRestriction { get; set; }
-
+    public static List<Movie> GetMovies()
+    {
+        return new List<Movie>(MoviesList);
+    }
+    public static void ClearMovies()
+    {
+        MoviesList.Clear();
+    }
     public string Title
     {
         get => _title;

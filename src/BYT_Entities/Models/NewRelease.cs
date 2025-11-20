@@ -50,7 +50,14 @@ public class NewRelease
         }
         NewReleaseList.Add(newRelease);
     }
-
+    public static List<NewRelease> GetNewReleasesMovies()
+    {
+        return new List<NewRelease>(NewReleaseList);
+    }
+    public static void ClearNewRleaseMovies()
+    {
+        NewReleaseList.Clear();
+    }
     public static void Save(string path = "newrelease.xml")
     {
         StreamWriter file = File.CreateText(path);
