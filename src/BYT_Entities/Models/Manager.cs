@@ -9,7 +9,6 @@ public class Manager
     public int Id { get; set; }
     private string _department;
     private double _baseSalary;
-    private double _bonus;
     private double _bonusPercentage;
     public static double MaxSalaryBonus { get; } = 0.35;
     private static List<Manager> managersList = new List<Manager>();
@@ -66,33 +65,32 @@ public class Manager
         }
     }
 
-    public double Bonus
+    public double GetBonus()
     {
-        get => _bonus;
-        set
+        double bonus;
+
+        if (_bonusPercentage > MaxSalaryBonus)
         {
-            double bonus;
-            if (_bonusPercentage > MaxSalaryBonus)
-            {
-                Console.WriteLine("The bonus percentage is too large, it's reduced to the maximum.");
-                bonus = BaseSalary * _bonusPercentage;
-            }
-            else
-            {
-                bonus = BaseSalary * _bonusPercentage;
-            }
-            if (bonus < 0)
-                throw new ArgumentOutOfRangeException(nameof(Bonus), "Bonus cannot be negative.");
-            _bonus = value;
+            Console.WriteLine("The bonus percentage is too large, it's reduced to the maximum.");
+            bonus = BaseSalary * MaxSalaryBonus;
         }
+        else
+        {
+            bonus = BaseSalary * _bonusPercentage;
+        }
+
+        if (bonus < 0)
+            throw new ArgumentOutOfRangeException(nameof(bonus), "Bonus cannot be negative.");
+
+        return bonus;
     }
 
-    public Manager(int id, string department, double baseSalary, double bonus, double bonusPercentage)
+
+    public Manager(int id, string department, double baseSalary, double bonusPercentage)
     {
         Id = id;
         Department = department;
         BaseSalary = baseSalary;
-        Bonus = bonus;
         BonusPercentage = bonusPercentage;
         AddManager(this);
     }
