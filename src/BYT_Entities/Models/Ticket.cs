@@ -20,6 +20,8 @@ public class Ticket
         Status = TicketStatus.Available;
         PaymentType = TicketPaymentType.None;
         ReasonOfRefundOrExpiration = null;
+        
+        AddTicket(this);
     }
     
     public Ticket(){}
@@ -40,6 +42,15 @@ public class Ticket
         AddTicket(this);
     }
 
+    public static List<Ticket> GetTickets()
+    {
+        return new List<Ticket>(_tickets);
+    }
+
+    public static void ClearTickets()
+    {
+        _tickets.Clear();
+    }
 
     private static void AddTicket(Ticket ticket)
     {
@@ -102,6 +113,7 @@ public class Ticket
         }
     }
 
+    [XmlIgnore]
     public TicketStatus Status
     {
         get => _status;
@@ -114,6 +126,7 @@ public class Ticket
         }
     }
 
+    [XmlIgnore]
     public string? ReasonOfRefundOrExpiration
     {
         get => _reasonOfRefundOrExpiration;
@@ -126,6 +139,7 @@ public class Ticket
         }
     }
 
+    [XmlIgnore]
     public TicketPaymentType PaymentType
     {
         get => _paymentType;
