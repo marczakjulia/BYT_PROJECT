@@ -7,24 +7,24 @@ public class ScreeningTests
 {
     private Auditorium _auditorium;
     private Movie _movie;
-    
+
     [SetUp]
     public void Setup()
     {
-        var tempSeatsList = new List<Seat>();
-        for (int i = 0; i < 15; i++)
+        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1);
+
+        if (_auditorium.Seats.Any())
         {
-            tempSeatsList.Add(null);
+            var seatsToRemove = _auditorium.Seats.ToList();
+            foreach (var seat in seatsToRemove) _auditorium.RemoveSeat(seat);
         }
-        
-        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, tempSeatsList, 1);
-        _auditorium.Seats.Clear();
-        
-        for (int i = 0; i < 15; i++)
+
+        for (var i = 0; i < 15; i++)
         {
-            // 00A,01A,...,14A
-            _auditorium.Seats.Add(new Seat($"{i:D2}A", SeatType.Normal, _auditorium, i + 1));
+            var seat = new Seat($"{i:D2}A", SeatType.Normal, i + 1);
+            _auditorium.SetSeat(seat); 
         }
+
         _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13);
     }
 
@@ -32,7 +32,7 @@ public class ScreeningTests
     public void MovieIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new Screening(1, null, _auditorium, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0), 
+            new Screening(1, null, _auditorium, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Subtitles));
     }
 
@@ -40,7 +40,7 @@ public class ScreeningTests
     public void AuditoriumIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new Screening(1, _movie, null, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0), 
+            new Screening(1, _movie, null, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Original));
     }
 
@@ -48,7 +48,7 @@ public class ScreeningTests
     public void DateIsInPast()
     {
         Assert.Throws<ArgumentException>(() =>
-            new Screening(1, _movie, _auditorium, DateTime.Now.Date.AddDays(-1), new TimeSpan(14, 30, 0), 
+            new Screening(1, _movie, _auditorium, DateTime.Now.Date.AddDays(-1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Original));
     }
 
@@ -57,24 +57,54 @@ public class ScreeningTests
     {
         var pastTime = DateTime.Now.TimeOfDay.Subtract(TimeSpan.FromHours(1));
         Assert.Throws<ArgumentException>(() =>
-            new Screening(1, _movie, _auditorium, DateTime.Now.Date, pastTime, 
+            new Screening(1, _movie, _auditorium, DateTime.Now.Date, pastTime,
                 ScreeningFormat._2D, ScreeningVersion.Original));
     }
-    
+
     [Test]
     public void AuditoriumHasLessThan12Seats()
     {
-        var seats = new List<Seat>();
-        var tempAuditorium = new Auditorium("Temp", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, new List<Seat>(new Seat[12]), 1);
+        var tempAuditorium = new Auditorium("Temp", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 1);
 
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
-            seats.Add(new Seat($"{i:D2}A", SeatType.Normal, tempAuditorium, i + 1));
+            var seat = new Seat($"{i:D2}A", SeatType.Normal, i + 1);
+            tempAuditorium.SetSeat(seat);
         }
+        
+        Assert.DoesNotThrow(() => new Auditorium("Mini Salon", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 2)); 
+    }
 
-        Assert.Throws<ArgumentException>(() =>
+    [Test]
+    public void ScreeningCreationWithValidParameters()
+    {
+        Assert.DoesNotThrow(() =>
         {
-            new Auditorium("Mini Salon", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, seats, 2);
+            var screening = new Screening(1, _movie, _auditorium, DateTime.Now.Date.AddDays(1),
+                new TimeSpan(14, 30, 0), ScreeningFormat._2D, ScreeningVersion.Original);
+
+            Assert.That(screening.Movie, Is.EqualTo(_movie));
+            Assert.That(screening.Auditorium, Is.EqualTo(_auditorium));
+            Assert.That(screening.Status, Is.EqualTo(ScreeningStatus.Planned));
         });
+    }
+
+    [Test]
+    public void CreateScreeningGeneratesTickets()
+    {
+        var screening = new Screening(1, _movie, _auditorium, DateTime.Now.Date.AddDays(1),
+            new TimeSpan(14, 30, 0), ScreeningFormat._2D, ScreeningVersion.Original);
+
+        screening.CreateScreening(25.00m);
+
+        Assert.That(screening.TicketsBySeatCode.Count, Is.EqualTo(15)); 
+        Assert.That(screening.Status, Is.EqualTo(ScreeningStatus.Planned));
+
+        foreach (var seat in _auditorium.Seats)
+        {
+            Assert.That(screening.TicketsBySeatCode.ContainsKey(seat.Code), Is.True);
+            Assert.That(screening.TicketsBySeatCode[seat.Code].Price, Is.EqualTo(25.00m));
+            Assert.That(screening.TicketsBySeatCode[seat.Code].Status, Is.EqualTo(TicketStatus.Available));
+        }
     }
 }

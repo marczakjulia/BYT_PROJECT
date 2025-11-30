@@ -11,20 +11,18 @@ public class AuditoriumTests
     [SetUp]
     public void Setup()
     {
-        var tempSeatsList = new List<Seat>();
-        for (var i = 0; i < 15; i++)
-            tempSeatsList.Add(null);
-
         _auditorium = new Auditorium(
             "Salon 1",
             AuditoriumScreenType._2D,
             AuditoriumSoundsSystem.Stereo,
-            tempSeatsList,
             1
         );
-        _auditorium.Seats.Clear();
+
         for (var i = 0; i < 15; i++)
-            _auditorium.Seats.Add(new Seat($"{i:D2}A", SeatType.Normal, _auditorium, i + 1));
+        {
+            var seat = new Seat($"{i:D2}A", SeatType.Normal, i + 1);
+            _auditorium.SetSeat(seat);
+        }
 
         _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13);
     }
@@ -51,39 +49,40 @@ public class AuditoriumTests
     }
 
     [Test]
-    public void AuditoriumHasLessThan12Seats()
+    public void AuditoriumCanBeCreatedWithLessThan12SeatsInitially()
     {
-        var seats = new List<Seat>();
-        var tempAuditorium = new Auditorium("Temp", AuditoriumScreenType._3D, AuditoriumSoundsSystem.DTS,
-            new List<Seat>(new Seat[12]), 5);
-
-        for (var i = 0; i < 10; i++)
-            seats.Add(new Seat($"{i:D2}A", SeatType.Normal, tempAuditorium, i + 1));
-
-        Assert.Throws<ArgumentException>(() =>
-            new Auditorium("Mini Salon", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, seats, 2));
+        Assert.DoesNotThrow(() =>
+        {
+            var minimalAuditorium = new Auditorium("Mini Salon", AuditoriumScreenType._2D,
+                AuditoriumSoundsSystem.Stereo, 2);
+            Assert.That(minimalAuditorium.Seats.Count, Is.EqualTo(0));
+        });
     }
 
     [Test]
-    public void AuditoriumAddSeat()
+    public void AuditoriumAddSeatToAuditorium()
     {
-        var newSeat = new Seat("15A", SeatType.VIP, _auditorium, 16);
-        _auditorium.AddSeat(newSeat);
+        var newSeat = new Seat("15A", SeatType.VIP, 16);
+        _auditorium.SetSeat(newSeat);
+
         Assert.That(_auditorium.Seats.Contains(newSeat));
+        Assert.That(newSeat.Auditorium, Is.EqualTo(_auditorium));
     }
 
     [Test]
-    public void AuditoriumAddNullSeat()
+    public void AuditoriumAddSeatToAuditoriumWithNull()
     {
-        Assert.Throws<ArgumentException>(() => _auditorium.AddSeat(null!));
+        Assert.Throws<ArgumentException>(() => _auditorium.SetSeat(null!));
     }
+
 
     [Test]
-    public void AuditoriumRemoveSeatWorks()
+    public void AuditoriumRemoveNonExistentSeatThrowsException()
     {
-        var seatToRemove = _auditorium.Seats[0];
-        _auditorium.RemoveSeat(seatToRemove);
-        Assert.That(!_auditorium.Seats.Contains(seatToRemove));
-    }
+        var nonExistentSeat = new Seat("99Z", SeatType.Normal, 999);
 
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            _auditorium.RemoveSeat(nonExistentSeat));
+        Assert.That(exception.Message, Does.Contain("not found"));
+    }
 }

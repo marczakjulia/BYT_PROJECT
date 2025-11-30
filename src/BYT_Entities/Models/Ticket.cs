@@ -20,11 +20,13 @@ public class Ticket
         Status = TicketStatus.Available;
         PaymentType = TicketPaymentType.None;
         ReasonOfRefundOrExpiration = null;
-        
+
         AddTicket(this);
     }
-    
-    public Ticket(){}
+
+    public Ticket()
+    {
+    }
 
     public Ticket(decimal price, TicketStatus status, TicketPaymentType paymentType, int id, string? reason = null)
     {
@@ -38,66 +40,8 @@ public class Ticket
         ReasonOfRefundOrExpiration = reason;
         PaymentType = paymentType;
         Id = id;
-        
+
         AddTicket(this);
-    }
-
-    public static List<Ticket> GetTickets()
-    {
-        return new List<Ticket>(_tickets);
-    }
-
-    public static void ClearTickets()
-    {
-        _tickets.Clear();
-    }
-
-    private static void AddTicket(Ticket ticket)
-    {
-        if (ticket == null)
-            throw new ArgumentException("Ticket cannot be null.");
-
-        _tickets.Add(ticket);
-    }
-
-    public static void Save(string path = "ticket.xml")
-    {
-        StreamWriter file = File.CreateText(path);
-        XmlSerializer serializer = new XmlSerializer(typeof(List<Ticket>));
-        using (XmlTextWriter writer = new XmlTextWriter(file))
-        {
-            serializer.Serialize(writer, _tickets);
-        }
-    }
-
-    public static bool Load(string path = "ticket.xml")
-    {
-        StreamReader file;
-        try
-        {
-            file = File.OpenText(path);
-        }
-        catch (FileNotFoundException)
-        {
-            _tickets.Clear();
-            return false;
-        }
-
-        XmlSerializer serializer = new XmlSerializer(typeof(List<Ticket>));
-        using (XmlTextReader reader = new XmlTextReader(file))
-        {
-            try
-            {
-                _tickets = (List<Ticket>)serializer.Deserialize(reader);
-            }
-            catch (InvalidCastException)
-            {
-                _tickets.Clear();
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public int Id { get; set; }
@@ -150,7 +94,122 @@ public class Ticket
             _paymentType = value;
         }
     }
-    
+
+    [XmlIgnore] public ReviewPage? ReviewPage { get; private set; }
+
+    public static List<Ticket> GetTickets()
+    {
+        return new List<Ticket>(_tickets);
+    }
+
+    public static void ClearTickets()
+    {
+        _tickets.Clear();
+    }
+
+    private static void AddTicket(Ticket ticket)
+    {
+        if (ticket == null)
+            throw new ArgumentException("Ticket cannot be null.");
+
+        _tickets.Add(ticket);
+    }
+
+    public static void Save(string path = "ticket.xml")
+    {
+        var file = File.CreateText(path);
+        var serializer = new XmlSerializer(typeof(List<Ticket>));
+        using (var writer = new XmlTextWriter(file))
+        {
+            serializer.Serialize(writer, _tickets);
+        }
+    }
+
+    public static bool Load(string path = "ticket.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            _tickets.Clear();
+            return false;
+        }
+
+        var serializer = new XmlSerializer(typeof(List<Ticket>));
+        using (var reader = new XmlTextReader(file))
+        {
+            try
+            {
+                _tickets = (List<Ticket>)serializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                _tickets.Clear();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void AddReview(ReviewPage reviewPage)
+    {
+        if (reviewPage == null)
+            throw new ArgumentException("Review page cannot be null.");
+
+        if (ReviewPage == reviewPage)
+            return;
+
+        if (ReviewPage != null)
+            throw new InvalidOperationException("Ticket has already has a review page.");
+
+        if (reviewPage.Ticket != null && reviewPage.Ticket != this)
+            throw new InvalidOperationException("This review is already associated with another ticket.");
+
+        ReviewPage = reviewPage;
+
+        //creating reverse connection
+        if (reviewPage.Ticket != this)
+            reviewPage.SetTicket(this);
+    }
+
+    public void RemoveReview()
+    {
+        if (ReviewPage == null)
+            return;
+        var reviewPageToRemove = ReviewPage;
+        ReviewPage = null;
+
+        if (reviewPageToRemove.Ticket == this)
+            reviewPageToRemove.RemoveTicket();
+    }
+
+    public void UpdateReview(ReviewPage newReview)
+    {
+        if (newReview == null)
+            throw new ArgumentException("New review cannot be null.");
+
+        if (ReviewPage == newReview)
+            return;
+
+        if (newReview.Ticket != null && newReview.Ticket != this)
+            throw new InvalidOperationException("The new review is already associated with another ticket.");
+
+        var oldReview = ReviewPage;
+        if (oldReview != null)
+        {
+            ReviewPage = null;
+            if (oldReview.Ticket == this)
+                oldReview.RemoveTicket();
+        }
+
+        ReviewPage = newReview;
+        if (newReview.Ticket != this)
+            newReview.SetTicket(this);
+    }
 
     public void SellTicket(TicketPaymentType paymentType)
     {

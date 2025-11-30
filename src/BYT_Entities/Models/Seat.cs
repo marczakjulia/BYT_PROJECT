@@ -13,21 +13,25 @@ public class Seat
     // 92A, 05J, 96Z
     private static readonly Regex SeatCodeSyntax = new(@"^[0-9]{2}[A-Z]$", RegexOptions.Compiled);
 
-    private Auditorium _auditorium;
+    [XmlIgnore] private Auditorium _auditorium;
+
     private string _code;
     private SeatType _type;
 
-    public Seat(string code, SeatType type, Auditorium auditorium, int id)
+    public Seat(string code, SeatType type, int id)
     {
         Code = code;
         Type = type;
-        Auditorium = auditorium;
+        _auditorium = null;
         Id = id;
 
         AddSeats(this);
     }
 
-    public Seat(){}
+    public Seat()
+    {
+    }
+
     public int Id { get; set; }
 
 
@@ -57,15 +61,32 @@ public class Seat
         }
     }
 
-    public Auditorium Auditorium
+    [XmlIgnore] public Auditorium Auditorium => _auditorium;
+
+    public void SetAuditorium(Auditorium auditorium)
     {
-        get => _auditorium;
-        set
-        {
-            if (value == null)
-                throw new ArgumentException("Seat must belong to an auditorium.");
-            _auditorium = value;
-        }
+        if (auditorium == null)
+            throw new ArgumentException("Auditorium can not be null.");
+
+        if (_auditorium == auditorium)
+            return;
+
+        if (_auditorium != null)
+            throw new InvalidOperationException("Seat is already assigned to an auditorium.");
+
+        _auditorium = auditorium;
+        auditorium.SetSeat(this);
+    }
+
+    public void RemoveAuditorium()
+    {
+        if (_auditorium == null)
+            return;
+
+        var auditoriumToRemove = _auditorium;
+        _auditorium = null;
+
+        auditoriumToRemove.RemoveSeat(this);
     }
 
     private static void AddSeats(Seat seat)

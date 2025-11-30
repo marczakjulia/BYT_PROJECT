@@ -8,22 +8,27 @@ public class SeatTests
     [SetUp]
     public void Setup()
     {
-        var tempSeatsList = new List<Seat>();
-        for (var i = 0; i < 15; i++) tempSeatsList.Add(null);
+        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1);
 
-        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, tempSeatsList,
-            1);
-        _auditorium.Seats.Clear();
+        if (_auditorium.Seats.Any())
+        {
+            var seatsToRemove = _auditorium.Seats.ToList();
+            foreach (var seat in seatsToRemove) _auditorium.RemoveSeat(seat);
+        }
 
         for (var i = 0; i < 15; i++)
-            // 00A,01A,...,14A
-            _auditorium.Seats.Add(new Seat($"{i:D2}A", SeatType.Normal, _auditorium, i + 1));
+        {
+            var seat = new Seat($"{i:D2}A", SeatType.Normal, i + 1);
+            _auditorium.SetSeat(seat);
+        }
     }
 
     [Test]
     public void SeatCreatedProperly()
     {
-        var seat = new Seat("05A", SeatType.Normal, _auditorium, 1);
+        var seat = new Seat("05A", SeatType.Normal, 1);
+        seat.SetAuditorium(_auditorium);
+
         Assert.That(seat.Code, Is.EqualTo("05A"));
         Assert.That(seat.Type, Is.EqualTo(SeatType.Normal));
         Assert.That(seat.Auditorium, Is.EqualTo(_auditorium));
@@ -32,13 +37,60 @@ public class SeatTests
     [Test]
     public void SeatInvalidCode()
     {
-        Assert.Throws<ArgumentException>(() => new Seat("BADCODE", SeatType.Normal, _auditorium, 1));
-        Assert.Throws<ArgumentException>(() => new Seat("11a", SeatType.VIP, _auditorium, 1));
+        Assert.Throws<ArgumentException>(() => new Seat("BADCODE", SeatType.Normal, 1));
+        Assert.Throws<ArgumentException>(() => new Seat("11a", SeatType.VIP, 1));
+
+        Assert.DoesNotThrow(() => new Seat("11A", SeatType.VIP, 1));
+        Assert.DoesNotThrow(() => new Seat("99Z", SeatType.Normal, 2));
     }
 
     [Test]
-    public void SeatNullAuditorium()
+    public void SeatCanExistWithoutAuditorium()
     {
-        Assert.Throws<ArgumentException>(() => new Seat("05A", SeatType.Normal, null!, 1));
+        var seat = new Seat("05A", SeatType.Normal, 1);
+
+        Assert.That(seat.Code, Is.EqualTo("05A"));
+        Assert.That(seat.Type, Is.EqualTo(SeatType.Normal));
+        Assert.That(seat.Auditorium, Is.Null);
+
+        seat.SetAuditorium(_auditorium);
+        Assert.That(seat.Auditorium, Is.EqualTo(_auditorium));
+    }
+
+    [Test]
+    public void AssignToAuditoriumCreatesReverseConnection()
+    {
+        var seat = new Seat("05A", SeatType.Normal, 1);
+
+        seat.SetAuditorium(_auditorium);
+
+        Assert.That(seat.Auditorium, Is.EqualTo(_auditorium));
+        Assert.That(_auditorium.Seats.Contains(seat), Is.True);
+    }
+
+    [Test]
+    public void RemoveFromAuditoriumRemovesReverseConnection()
+    {
+        var seat = new Seat("05A", SeatType.Normal, 1);
+        seat.SetAuditorium(_auditorium);
+
+        seat.RemoveAuditorium();
+
+        Assert.That(seat.Auditorium, Is.Null);
+        Assert.That(_auditorium.Seats.Contains(seat), Is.False);
+    }
+
+    [Test]
+    public void CannotAssignToAuditoriumWhenAlreadyAssigned()
+    {
+        var seat = new Seat("05A", SeatType.Normal, 1);
+        var anotherAuditorium =
+            new Auditorium("Salon 2", AuditoriumScreenType._3D, AuditoriumSoundsSystem.DolbyAtmos, 2);
+
+        seat.SetAuditorium(_auditorium);
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            seat.SetAuditorium(anotherAuditorium));
+        Assert.That(exception.Message, Does.Contain("already assigned"));
     }
 }
