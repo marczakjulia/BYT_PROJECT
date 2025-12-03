@@ -7,7 +7,8 @@ public class ReviewPageTests
     [Test]
     public void ReviewPageCreatedProperly()
     {
-        var review = new ReviewPage("Mazhar", "Altincay", 9, 1, "Nice movie");
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        var review = new ReviewPage("Mazhar", "Altincay", 9, 1, movie,"Nice movie");
         Assert.That(review.Name, Is.EqualTo("Mazhar"));
         Assert.That(review.Surname, Is.EqualTo("Altincay"));
         Assert.That(review.Rate, Is.EqualTo(9));
@@ -17,14 +18,16 @@ public class ReviewPageTests
     [Test]
     public void ReviewPageEmptyNameOrSurname()
     {
-        Assert.Throws<ArgumentException>(() => new ReviewPage("", "Altincay", 7, 1));
-        Assert.Throws<ArgumentException>(() => new ReviewPage("Mazhar", "", 7, 1));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        Assert.Throws<ArgumentException>(() => new ReviewPage("", "Altincay", 7, 1,movie));
+        Assert.Throws<ArgumentException>(() => new ReviewPage("Mazhar", "", 7, 1,movie));
     }
 
     [Test]
     public void ReviewPageInvalidRate_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new ReviewPage("Mazhar", "Altincay", 0, 1));
-        Assert.Throws<ArgumentOutOfRangeException>(() => new ReviewPage("Mazhar", "Altincay", 11, 1));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ReviewPage("Mazhar", "Altincay", 0, 1,movie));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ReviewPage("Mazhar", "Altincay", 11, 1,movie));
     }
 }

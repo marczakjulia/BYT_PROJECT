@@ -13,8 +13,9 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void AddReviewCreatesReverseConnection()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket = new Ticket(19.99m, 1);
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
 
         ticket.AddReview(review);
 
@@ -25,8 +26,9 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void AddReviewFromReviewSideCreatesReverseConnection()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket = new Ticket(19.99m, 1);
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1,movie, "Super actings!");
 
         review.SetTicket(ticket);
 
@@ -37,8 +39,9 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void RemoveReviewRemovesReverseConnection()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket = new Ticket(19.99m, 1);
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         ticket.AddReview(review);
 
         ticket.RemoveReview();
@@ -50,8 +53,9 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void RemoveReviewFromReviewSideRemovesReverseConnection()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket = new Ticket(19.99m, 1);
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         ticket.AddReview(review);
 
         review.RemoveTicket();
@@ -63,9 +67,10 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void AddReviewWhenTicketAlreadyHasReview()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket = new Ticket(19.99m, 1);
-        var review1 = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
-        var review2 = new ReviewPage("Gulcin", "Altincay", 9, 2);
+        var review1 = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
+        var review2 = new ReviewPage("Gulcin", "Altincay", 9, 2,movie);
         ticket.AddReview(review1);
 
         var exception = Assert.Throws<InvalidOperationException>(() => ticket.AddReview(review2));
@@ -75,9 +80,10 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void SetTicketWhenReviewAlreadyHasTicket()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket1 = new Ticket(19.99m, 1);
         var ticket2 = new Ticket(19.99m, 1);
-        var review = new ReviewPage("Gulcin", "Altincay", 9, 2);
+        var review = new ReviewPage("Gulcin", "Altincay", 9, 2,movie);
         review.SetTicket(ticket1);
 
         var exception = Assert.Throws<InvalidOperationException>(() => review.SetTicket(ticket2));
@@ -94,7 +100,8 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void SetTicketWithNull()
     {
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         Assert.Throws<ArgumentException>(() => review.SetTicket(null));
     }
 
@@ -109,7 +116,8 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void RemoveTicketWhenNoTicketExists()
     {
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         Assert.DoesNotThrow(() => review.RemoveTicket());
         Assert.That(review.Ticket, Is.Null);
     }
@@ -119,8 +127,9 @@ public class TicketReviewPageAssociationTests
     {
         var ticket1 = new Ticket(50.0m, 1);
         var ticket2 = new Ticket(60.0m, 2);
-        var review1 = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
-        var review2 = new ReviewPage("Gulcin", "Altincay", 5, 2);
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        var review1 = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
+        var review2 = new ReviewPage("Gulcin", "Altincay", 5, 2,movie);
 
         ticket1.AddReview(review1); // Connect from ticket side
         review2.SetTicket(ticket2); // Connect from review side
@@ -134,9 +143,10 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void UpdateReviewReplacesOldReviewWithNewAndUpdatesReverseConnections()
     {
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
         var ticket = new Ticket(19.0m, 2);
-        var oldReview = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
-        var newReview = new ReviewPage("Gulcin", "Altincay", 5, 2);
+        var oldReview = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
+        var newReview = new ReviewPage("Gulcin", "Altincay", 5, 2,movie);
         ticket.AddReview(oldReview);
 
         ticket.UpdateReview(newReview);
@@ -151,7 +161,8 @@ public class TicketReviewPageAssociationTests
     {
         var oldTicket = new Ticket(20.0m, 1);
         var newTicket = new Ticket(22.0m, 2);
-        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, "Super actings!");
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test");
+        var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         review.SetTicket(oldTicket);
 
         review.UpdateTicket(newTicket);

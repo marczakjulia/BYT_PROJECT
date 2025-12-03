@@ -10,15 +10,15 @@ public class ReviewPage
     private string _name;
     private int _rate;
     private string _surname;
-
-    public ReviewPage(string name, string surname, int rate, int id, string? comment = null)
+    public Movie? Movie { get; private set; }
+    public ReviewPage(string name, string surname, int rate, int id, Movie movie, string? comment = null)
     {
         Name = name;
         Surname = surname;
         Rate = rate;
         Id = id;
         Comment = comment;
-
+        SetMovie(movie);
         AddReviewPage(this);
     }
 
@@ -145,8 +145,6 @@ public class ReviewPage
             throw new InvalidOperationException("Review associated with another ticket already exists.");
 
         Ticket = ticket;
-
-        //create reverse
         if (ticket.ReviewPage != this)
             ticket.AddReview(this);
     }
@@ -185,5 +183,46 @@ public class ReviewPage
         Ticket = newTicket;
         if (newTicket.ReviewPage != this)
             newTicket.AddReview(this);
+    }
+    public void SetMovie(Movie movie)
+    {
+        if (movie == null)
+            throw new ArgumentException("Movie cannot be null.");
+
+        if (Movie == movie)
+            return;
+
+        Movie? oldMovie = Movie;
+
+        if (oldMovie != null)
+        {
+            Movie = null;
+            oldMovie.RemoveReviewInternal(this);
+        }
+
+        Movie = movie;
+        if (!movie.GetReviews().Contains(this))
+            movie.AddReviewInternal(this);
+    }
+    public void RemoveMovie()
+    {
+        if (Movie == null)
+            return;
+
+        Movie oldMovie = Movie;
+        Movie = null;
+
+        if (oldMovie.GetReviews().Contains(this))
+            oldMovie.RemoveReviewInternal(this);
+    }
+    internal void SetMovieInternal(Movie movie)
+    {
+        Movie = movie;
+    }
+
+    internal void RemoveMovieInternal(Movie movie)
+    {
+        if (Movie == movie)
+            Movie = null;
     }
 }
