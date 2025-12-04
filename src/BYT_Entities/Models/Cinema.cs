@@ -13,6 +13,7 @@ public class Cinema
     private string _email;
     private string _openingHours;
     private static List<Cinema> cinemasList = new List<Cinema>();
+    private HashSet<Employee> _employees = new HashSet<Employee>();
     public static List<Cinema> GetCinemas()
     {
         return new List<Cinema>(cinemasList);
@@ -83,6 +84,47 @@ public class Cinema
                 throw new ArgumentException("Opening hours cannot be empty.");
             _openingHours = value.Trim();
         }
+    }
+    
+    public HashSet<Employee> GetEmployees()
+    {
+        return new HashSet<Employee>(_employees);
+    }
+
+    public void AddEmployee(Employee employee)
+    {
+        if (employee == null)
+            throw new ArgumentException("Employee cannot be null.");
+
+        if (_employees.Contains(employee))
+            throw new InvalidOperationException("This employee is already linked to this cinema.");
+
+        _employees.Add(employee);
+
+        employee.AddCinemaInternal(this);
+    }
+
+    public void RemoveEmployee(Employee employee)
+    {
+        if (employee == null)
+            throw new ArgumentException("Employee cannot be null.");
+
+        if (!_employees.Contains(employee))
+            throw new InvalidOperationException("This employee is not linked to this cinema.");
+
+        _employees.Remove(employee);
+
+        employee.RemoveCinemaInternal(this);
+    }
+
+    internal void AddEmployeeInternal(Employee employee)
+    {
+        _employees.Add(employee);
+    }
+
+    internal void RemoveEmployeeInternal(Employee employee)
+    {
+        _employees.Remove(employee);
     }
     
     public Cinema(int id, string name, string address, string phone, string email, string openingHours)

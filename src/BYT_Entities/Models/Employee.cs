@@ -18,6 +18,7 @@ public class Employee
     private DateTime _hireDate;
     private Address _address;
     private static List<Employee> employeesList = new List<Employee>();
+    private HashSet<Cinema> _cinemas = new HashSet<Cinema>();
     
     public static List<Employee> GetEmployees()
     {
@@ -112,7 +113,20 @@ public class Employee
             _hireDate = value;
         }
     }
-    public DateTime? FireDate { get; set; }
+    private DateTime? _fireDate;
+
+    public DateTime? FireDate
+    {
+        get => _fireDate;
+        set
+        {
+            if (value.HasValue && value.Value > DateTime.Now)
+                throw new ArgumentException("Fire date cannot be in the future.");
+
+            _fireDate = value;
+        }
+    }
+
 
     public EmployeeStatus Status { get; set; } = EmployeeStatus.Working;
 
@@ -125,6 +139,48 @@ public class Employee
                 throw new ArgumentOutOfRangeException(nameof(Salary), "Base salary cannot be negative.");
             _salary = value;
         }
+    }
+    
+    
+    public HashSet<Cinema> GetCinemas()
+    {
+        return new HashSet<Cinema>(_cinemas);
+    }
+
+    public void AddCinema(Cinema cinema)
+    {
+        if (cinema == null)
+            throw new ArgumentException("Cinema cannot be null.");
+
+        if (_cinemas.Contains(cinema))
+            throw new InvalidOperationException("This cinema is already linked to this employee.");
+
+        _cinemas.Add(cinema);
+
+        cinema.AddEmployeeInternal(this);
+    }
+
+    public void RemoveCinema(Cinema cinema)
+    {
+        if (cinema == null)
+            throw new ArgumentException("Cinema cannot be null.");
+
+        if (!_cinemas.Contains(cinema))
+            throw new InvalidOperationException("This cinema is not linked to this employee.");
+
+        _cinemas.Remove(cinema);
+
+        cinema.RemoveEmployeeInternal(this);
+    }
+
+    internal void AddCinemaInternal(Cinema cinema)
+    {
+        _cinemas.Add(cinema);
+    }
+
+    internal void RemoveCinemaInternal(Cinema cinema)
+    {
+        _cinemas.Remove(cinema);
     }
 
     public Employee(int id, string name, string surname, string pesel, string email,
