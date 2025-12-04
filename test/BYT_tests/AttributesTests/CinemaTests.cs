@@ -28,7 +28,6 @@ public class CinemaTests
         Assert.DoesNotThrow(() => new Cinema(3, "Cinema","Street 555", "+4812345678901", "cinema@cinema", "8-21"));    
     }
     
-    //Extent tests
     [Test]
     public void Extent_ShouldStoreCreatedCinemas()
     {
