@@ -15,8 +15,13 @@ public class Movie
     private string _director;
     private static List<Movie> MoviesList = new List<Movie>();
     public AgeRestrictionType? AgeRestriction { get; set; }
-    
     private HashSet<ReviewPage> _reviews = new HashSet<ReviewPage>();
+    
+    [XmlIgnore]
+    private HashSet<Screening> _screenings = new();
+
+    [XmlIgnore]
+    public HashSet<Screening> Screenings => new(_screenings);
     public static List<Movie> GetMovies()
     {
         return new List<Movie>(MoviesList);
@@ -176,6 +181,44 @@ public class Movie
     internal void RemoveReviewInternal(ReviewPage review)
     {
         _reviews.Remove(review);
+    }
+
+    public void AddScreening(Screening screening)
+    {
+        if (screening == null)
+            throw new ArgumentException("Screening cannot be null.");
+
+        if (_screenings.Contains(screening))
+            return;
+
+        _screenings.Add(screening);
+
+        if (screening.Movie != this)
+            screening.SetMovieInternal(this);
+    }
+
+    public void RemoveScreening(Screening screening)
+    {
+        if (screening == null)
+            throw new ArgumentException("Screening cannot be null.");
+
+        if (!_screenings.Contains(screening))
+            return;
+
+        _screenings.Remove(screening);
+
+        if (screening.Movie == this)
+            screening.RemoveMovieInternal(this);
+    }
+
+    internal void AddScreeningInternal(Screening screening)
+    {
+        _screenings.Add(screening);
+    }
+
+    internal void RemoveScreeningInternal(Screening screening)
+    {
+        _screenings.Remove(screening);
     }
 
 

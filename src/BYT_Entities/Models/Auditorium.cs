@@ -15,6 +15,12 @@ public class Auditorium
     private Cinema _cinema;
     [XmlIgnore]
     public Cinema Cinema { get; set; }
+    [XmlIgnore]
+    private HashSet<Screening> _screenings = new();
+
+    [XmlIgnore]
+    public HashSet<Screening> Screenings => new(_screenings);
+
 
     internal void SetCinemaInternal(Cinema cinema)
     {
@@ -126,6 +132,45 @@ public class Auditorium
     {
         return _seats.Count;
     }
+    
+    public void AddScreening(Screening screening)
+    {
+        if (screening == null)
+            throw new ArgumentException("Screening cannot be null.");
+
+        if (_screenings.Contains(screening))
+            return;
+
+        _screenings.Add(screening);
+
+        if (screening.Auditorium != this)
+            screening.SetAuditoriumInternal(this);
+    }
+
+    public void RemoveScreening(Screening screening)
+    {
+        if (screening == null)
+            throw new ArgumentException("Screening cannot be null.");
+
+        if (!_screenings.Contains(screening))
+            return;
+
+        _screenings.Remove(screening);
+
+        if (screening.Auditorium == this)
+            screening.RemoveAuditoriumInternal(this);
+    }
+
+    internal void AddScreeningInternal(Screening screening)
+    {
+        _screenings.Add(screening);
+    }
+
+    internal void RemoveScreeningInternal(Screening screening)
+    {
+        _screenings.Remove(screening);
+    }
+
 
     public void SetSeats(HashSet<Seat> seats)
     {

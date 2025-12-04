@@ -21,64 +21,23 @@ public class Screening
     {
         Id = id;
         Movie = movie;
+        movie.AddScreening(this);
+        
         Auditorium = auditorium;
+        auditorium.AddScreening(this);
+        
         Date = date;
         StartTime = startTime;
         Format = format;
         Version = version;
         Status = ScreeningStatus.Planned;
         TicketsBySeatCode = new Dictionary<string, Ticket>();
-        
+
         AddScreening(this);
     }
-    public Screening(){}
 
-    private static void AddScreening(Screening screening)
+    public Screening()
     {
-        if (screening == null)
-            throw new ArgumentException("Screening cannot be null.");
-
-        _screenings.Add(screening);
-    }
-
-    public static void Save(string path = "screening.xml")
-    {
-        var file = File.CreateText(path);
-        var serializer = new XmlSerializer(typeof(List<Screening>));
-        using (var writer = new XmlTextWriter(file))
-        {
-            serializer.Serialize(writer, _screenings);
-        }
-    }
-
-    public static bool Load(string path = "screening.xml")
-    {
-        StreamReader file;
-        try
-        {
-            file = File.OpenText(path);
-        }
-        catch (FileNotFoundException)
-        {
-            _screenings.Clear();
-            return false;
-        }
-
-        var serializer = new XmlSerializer(typeof(List<Screening>));
-        using (var reader = new XmlTextReader(file))
-        {
-            try
-            {
-                _screenings = (List<Screening>)serializer.Deserialize(reader);
-            }
-            catch (InvalidCastException)
-            {
-                _screenings.Clear();
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public int Id { get; set; }
@@ -89,7 +48,7 @@ public class Screening
         set
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(Movie), "Movie cannot be null.");
+                throw new ArgumentException("Movie cannot be null.");
             _movie = value;
         }
     }
@@ -100,7 +59,7 @@ public class Screening
         set
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(Auditorium), "Auditorium cannot be null.");
+                throw new ArgumentException("Auditorium cannot be null.");
             _auditorium = value;
         }
     }
@@ -166,6 +125,92 @@ public class Screening
 
     //read-only
     public Dictionary<string, Ticket> TicketsBySeatCode { get; }
+    
+    internal void SetMovieInternal(Movie movie)
+    {
+        _movie = movie;
+        movie.AddScreeningInternal(this);
+    }
+
+    internal void RemoveMovieInternal(Movie movie)
+    {
+        if (_movie == movie)
+            _movie = null;
+
+        movie.RemoveScreeningInternal(this);
+    }
+
+    internal void SetAuditoriumInternal(Auditorium auditorium)
+    {
+        _auditorium = auditorium;
+        auditorium.AddScreeningInternal(this);
+    }
+
+    internal void RemoveAuditoriumInternal(Auditorium auditorium)
+    {
+        if (_auditorium == auditorium)
+            _auditorium = null;
+
+        auditorium.RemoveScreeningInternal(this);
+    }
+
+    // created remove func specifically for association tests, otherwise got an error about 'cannot access internal method' 
+    public void RemoveScreeningFromAssociations()
+    {
+        if (_movie != null)
+            _movie.RemoveScreeningInternal(this);
+
+        if (_auditorium != null)
+            _auditorium.RemoveScreeningInternal(this); 
+    }
+
+    private static void AddScreening(Screening screening)
+    {
+        if (screening == null)
+            throw new ArgumentException("Screening cannot be null.");
+
+        _screenings.Add(screening);
+    }
+
+    public static void Save(string path = "screening.xml")
+    {
+        var file = File.CreateText(path);
+        var serializer = new XmlSerializer(typeof(List<Screening>));
+        using (var writer = new XmlTextWriter(file))
+        {
+            serializer.Serialize(writer, _screenings);
+        }
+    }
+
+    public static bool Load(string path = "screening.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            _screenings.Clear();
+            return false;
+        }
+
+        var serializer = new XmlSerializer(typeof(List<Screening>));
+        using (var reader = new XmlTextReader(file))
+        {
+            try
+            {
+                _screenings = (List<Screening>)serializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                _screenings.Clear();
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public void CreateScreening(decimal price)
     {
