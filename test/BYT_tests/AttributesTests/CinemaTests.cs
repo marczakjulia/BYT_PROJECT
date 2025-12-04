@@ -74,6 +74,7 @@ public class CinemaTests
         Assert.AreEqual(2, extent.Count);
         Assert.AreEqual("Cine1", extent[0].Name);
         Assert.AreEqual("Cine2", extent[1].Name);
+        Assert.AreEqual("10-20", extent[1].OpeningHours);
         
         if (File.Exists(path))
             File.Delete(path);

@@ -12,6 +12,19 @@ public class Auditorium
     private string _name;
     private HashSet<Seat> _seats = new();
     private AuditoriumSoundsSystem _soundSystem;
+    private Cinema _cinema;
+    [XmlIgnore]
+    public Cinema Cinema { get; set; }
+
+    internal void SetCinemaInternal(Cinema cinema)
+    {
+        _cinema = cinema;
+    }
+    internal void RemoveCinemaInternal(Cinema cinema)
+    {
+        if (_cinema == cinema)
+            _cinema = null;
+    }
 
     public Auditorium()
     {

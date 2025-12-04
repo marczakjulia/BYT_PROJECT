@@ -18,7 +18,9 @@ public class Employee
     private DateTime _hireDate;
     private Address _address;
     private static List<Employee> employeesList = new List<Employee>();
+    [XmlIgnore]
     private HashSet<Cinema> _cinemas = new HashSet<Cinema>();
+
     
     public static List<Employee> GetEmployees()
     {
@@ -182,6 +184,12 @@ public class Employee
     {
         _cinemas.Remove(cinema);
     }
+    [XmlIgnore]
+    public List<Cinema> Cinemas
+    {
+        get => _cinemas.ToList();
+        set => _cinemas = value != null ? new HashSet<Cinema>(value) : new();
+    }
 
     public Employee(int id, string name, string surname, string pesel, string email,
         DateTime dayOfBirth, DateTime hireDate, double salary, Address address, EmployeeStatus status)
@@ -208,6 +216,16 @@ public class Employee
             xmlSerializer.Serialize(writer, employeesList);
         }
     }
+    public void RestoreRelations()
+    {
+        _cinemas.Clear();
+
+        foreach (var cinema in Cinemas)
+        {
+            _cinemas.Add(cinema);
+            cinema.AddEmployeeInternal(this);
+        }
+    }
 
     public static bool Load(string path = "employee.xml")
     {
@@ -227,6 +245,7 @@ public class Employee
             try
             {
                 employeesList = (List<Employee>)xmlSerializer.Deserialize(reader);
+
             }
             catch (InvalidCastException)
             {
@@ -239,6 +258,7 @@ public class Employee
                 return false;
             }
         }
+
         return true;
     }
     
