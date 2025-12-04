@@ -31,7 +31,7 @@ public class ScreeningTests
     [Test]
     public void MovieIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             new Screening(1, null, _auditorium, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Subtitles));
     }
@@ -39,7 +39,7 @@ public class ScreeningTests
     [Test]
     public void AuditoriumIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             new Screening(1, _movie, null, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Original));
     }
