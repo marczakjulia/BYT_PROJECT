@@ -15,26 +15,29 @@ public class Screening
     private TimeSpan _startTime;
     private ScreeningStatus _status;
     private ScreeningVersion _version;
+    
+    private readonly Dictionary<string, Ticket> _ticketsBySeatCode = new();
+    public IReadOnlyDictionary<string, Ticket> TicketsBySeatCode => _ticketsBySeatCode;
 
     public Screening(int id, Movie movie, Auditorium auditorium, DateTime date, TimeSpan startTime,
         ScreeningFormat format, ScreeningVersion version)
     {
         Id = id;
-        Movie = movie;
+        Movie = movie ?? throw new ArgumentException("Movie cannot be null");
         movie.AddScreening(this);
-        
-        Auditorium = auditorium;
+
+        Auditorium = auditorium ?? throw new ArgumentException("Auditorium cannot be null");
         auditorium.AddScreening(this);
-        
+
         Date = date;
         StartTime = startTime;
         Format = format;
         Version = version;
         Status = ScreeningStatus.Planned;
-        TicketsBySeatCode = new Dictionary<string, Ticket>();
 
         AddScreening(this);
     }
+
 
     public Screening()
     {
@@ -124,8 +127,39 @@ public class Screening
     }
 
     //read-only
-    public Dictionary<string, Ticket> TicketsBySeatCode { get; }
+    // public Dictionary<string, Ticket> TicketsBySeatCode { get; }
     
+    public void CreateTickets(decimal price)
+    {
+        int ticketId = 1;
+
+        foreach (var seat in Auditorium.Seats)
+        {
+            var ticket = new Ticket(price, ticketId++);
+            AddTicket(seat.Code, ticket);
+        }
+    }
+
+    public void AddTicket(string seatCode, Ticket ticket)
+    {
+        if (ticket == null) throw new ArgumentException( "Ticket cannot be null.");
+        if (_ticketsBySeatCode.ContainsKey(seatCode))
+            throw new InvalidOperationException($"A ticket for seat {seatCode} already exists.");
+
+        _ticketsBySeatCode.Add(seatCode, ticket);
+        ticket.SetScreeningInternal(this, seatCode);
+    }
+
+    public void RemoveTicket(string seatCode)
+    {
+        if (_ticketsBySeatCode.TryGetValue(seatCode, out var ticket))
+        {
+            ticket.RemoveScreeningInternal();
+            _ticketsBySeatCode.Remove(seatCode);
+        }
+    }
+
+
     internal void SetMovieInternal(Movie movie)
     {
         _movie = movie;
@@ -214,20 +248,19 @@ public class Screening
 
     public void CreateScreening(decimal price)
     {
-        if (TicketsBySeatCode.Count > 0)
+        if (_ticketsBySeatCode.Count > 0)
             throw new InvalidOperationException("Tickets have already been created");
 
         var ticketId = 1;
 
         foreach (var seat in Auditorium.Seats)
         {
-            TicketsBySeatCode.Add(seat.Code, new Ticket(price, ticketId));
-            ticketId++;
+            var ticket = new Ticket(price, ticketId++);
+            _ticketsBySeatCode.Add(seat.Code, ticket);
         }
-
-
         Status = ScreeningStatus.Planned;
     }
+
 
     public void StartScreening()
     {

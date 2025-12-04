@@ -12,6 +12,11 @@ public class Ticket
     private decimal _price;
     private string? _reasonOfRefundOrExpiration;
     private TicketStatus _status;
+    
+    [XmlIgnore]
+    public Screening Screening { get; private set; }
+    [XmlIgnore]
+    public string SeatCode { get; private set; }
 
     public Ticket(decimal price, int id)
     {
@@ -114,6 +119,19 @@ public class Ticket
 
         _tickets.Add(ticket);
     }
+    
+    internal void SetScreeningInternal(Screening screening, string seatCode)
+    {
+        Screening = screening ?? throw new ArgumentException("Screening cannot be null.");
+        SeatCode = seatCode ?? throw new ArgumentException("SeatCode cannot be null.");
+    }
+
+    internal void RemoveScreeningInternal()
+    {
+        Screening = null;
+        SeatCode = null;
+    }
+
 
     public static void Save(string path = "ticket.xml")
     {
