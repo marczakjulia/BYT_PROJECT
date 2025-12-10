@@ -188,8 +188,6 @@ public class Movie
             throw new InvalidOperationException("This review is not associated with the movie.");
 
         _reviews.Remove(review);
-
-        // Reverse removal
         review.RemoveMovieInternal(this);
     }
     internal void AddReviewInternal(ReviewPage review)
@@ -212,9 +210,10 @@ public class Movie
 
         _screenings.Add(screening);
 
-       // if (screening.Movie != this)
-            // screening.SetMovieInternal(this);
+        if (screening.Movie != this)
+            screening.SetMovie(this);
     }
+
 
     public void RemoveScreening(Screening screening)
     {
@@ -226,20 +225,11 @@ public class Movie
 
         _screenings.Remove(screening);
 
-       // if (screening.Movie == this)
-        //    screening.RemoveMovieInternal(this);
+        if (screening.Movie == this)
+            screening.RemoveMovie();
     }
 
-    internal void AddScreeningInternal(Screening screening)
-    {
-        _screenings.Add(screening);
-    }
-
-    internal void RemoveScreeningInternal(Screening screening)
-    {
-        _screenings.Remove(screening);
-    }
-
+    
     public void SetNewRelease(NewRelease newRelease)
     {
         if (newRelease == null)

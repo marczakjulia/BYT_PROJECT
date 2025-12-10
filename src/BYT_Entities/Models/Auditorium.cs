@@ -122,24 +122,24 @@ public class Auditorium
         if (screening == null)
             throw new ArgumentException("Screening cannot be null.");
 
-        if (_screenings.Add(screening))
-        {
-            if (screening.Auditorium != this)
-                screening.SetAuditorium(this);
-        }
+        _screenings.Add(screening);
+
+        if (screening.Auditorium != this)
+            screening.SetAuditorium(this);
     }
+
 
     public void RemoveScreening(Screening screening)
     {
         if (screening == null)
             throw new ArgumentException("Screening cannot be null.");
 
-        if (_screenings.Remove(screening))
-        {
-            if (screening.Auditorium == this)
-                screening.RemoveAuditorium();
-        }
+        _screenings.Remove(screening);
+
+        if (screening.Auditorium == this)
+            screening.RemoveAuditorium();
     }
+
 
 
     public void AddSeat(Seat seat)

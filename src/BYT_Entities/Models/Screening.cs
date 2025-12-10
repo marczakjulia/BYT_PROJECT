@@ -169,24 +169,30 @@ public class Screening
         if (movie == null)
             throw new ArgumentException("Movie cannot be null.");
 
-        if (Movie != null && Movie != movie)
-            Movie.RemoveScreening(this);
+        if (_movie == movie)
+            return;
 
-        Movie = movie;
+        if (_movie != null)
+            _movie.RemoveScreening(this);
+
+        _movie = movie;
 
         if (!movie.Screenings.Contains(this))
             movie.AddScreening(this);
     }
 
+
+
     public void RemoveMovie()
     {
-        if (Movie != null)
-        {
-            var oldMovie = Movie;
-            _movie = null; 
-            if (oldMovie.Screenings.Contains(this))
-                oldMovie.RemoveScreening(this);
-        }
+        if (_movie == null)
+            return;
+
+        var oldMovie = _movie;
+        _movie = null;
+
+        if (oldMovie.Screenings.Contains(this))
+            oldMovie.RemoveScreening(this);
     }
 
 
@@ -195,27 +201,29 @@ public class Screening
         if (auditorium == null)
             throw new ArgumentException("Auditorium cannot be null.");
 
-        if (Auditorium != null && Auditorium != auditorium)
-            Auditorium.RemoveScreening(this);
+        if (_auditorium == auditorium)
+            return;
 
-        Auditorium = auditorium;
+        if (_auditorium != null)
+            _auditorium.RemoveScreening(this);
 
-        if (!auditorium.Screenings.Contains(this))
-            auditorium.AddScreening(this);
+        _auditorium = auditorium;
+
+        auditorium.AddScreening(this);
     }
+
 
     public void RemoveAuditorium()
     {
-        if (Auditorium != null)
-        {
-            var oldAuditorium = Auditorium;
+        if (_auditorium == null)
+            return;
+        
+        var oldAuditorium = _auditorium;
+        _auditorium = null;
 
-            _auditorium = null;
-
-            if (oldAuditorium.Screenings.Contains(this))
-                oldAuditorium.RemoveScreening(this);
-        }
+        oldAuditorium.RemoveScreening(this);
     }
+
     
     public void RemoveCompletely()
     {
