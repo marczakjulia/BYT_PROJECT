@@ -24,7 +24,8 @@ public class AuditoriumTests
             _auditorium.SetSeat(seat);
         }
 
-        _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13);
+        _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13,
+            new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
     }
 
     [Test]

@@ -16,7 +16,7 @@ namespace TestByt;
      {
          Assert.Throws<ArgumentException>(() =>
              new Movie(1, "      ", "Poland", 111111, "a very nice amazing movie please give us max points ",
-                 "Julia Marczak", AgeRestrictionType.PG13));
+                 "Julia Marczak", AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(10/06/2025),true)));
      }
 
      [Test]
@@ -24,7 +24,7 @@ namespace TestByt;
      {
          Assert.Throws<ArgumentException>(() =>
              new Movie(1, "amazing new title      ", "  ", 222222,
-                 "a very nice amazing movie please give us max points ", "Julia Marczak", AgeRestrictionType.PG13));
+                 "a very nice amazing movie please give us max points ", "Julia Marczak", AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(10/06/2025),true)));
      }
 
      [Test]
@@ -32,7 +32,7 @@ namespace TestByt;
      {
          Assert.Throws<ArgumentOutOfRangeException>(() =>
              new Movie(1, "amazing new title      ", "Polska", -3,
-                 "a very nice amazing movie please give us max points ", "Julia Marczak", AgeRestrictionType.PG13));
+                 "a very nice amazing movie please give us max points ", "Julia Marczak", AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true)));
      }
 
      [Test]
@@ -40,7 +40,7 @@ namespace TestByt;
      {
          Assert.Throws<ArgumentException>(() =>
              new Movie(1, "amazing new title      ", "Polska", 444444,
-                 "    ", "Julia Marczak", AgeRestrictionType.PG13));
+                 "    ", "Julia Marczak", AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(10/06/2025),true)));
      }
 
      [Test]
@@ -49,7 +49,7 @@ namespace TestByt;
          Assert.Throws<ArgumentException>(() =>
              new Movie(1, "amazing new title", "Polska", 55555,
                  "i will never stop asking for extra points we all need a 5 from this subject", "    ",
-                 AgeRestrictionType.PG13));
+                 AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(10/06/2025),true)));
      }
 
      [Test]
@@ -59,7 +59,7 @@ namespace TestByt;
          {
              var movie = new Movie(1, "amazing new title      ", "Polska", 55555,
                  "i will never stop asking for extra points we all need a 5 from this subject", " Me   ",
-                 AgeRestrictionType.PG13);
+                 AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
          });
      }
      [Test]
@@ -68,16 +68,16 @@ namespace TestByt;
          Assert.DoesNotThrow(() =>
          {
              var movie = new Movie(1, "amazing new title      ", "Polska", 55555,
-                 "i will never stop asking for extra points we all need a 5 from this subject", " Me   ");
+                 "i will never stop asking for extra points we all need a 5 from this subject", " Me   ",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
          });
      }
       [Test]
         public void Extent_ShouldStoreCreatedMovies()
         {
             var movie1= new Movie(1, "amazing new title      ", "Polska", 55555,
-                "i will never stop asking for extra points we all need a 5 from this subject", " Me   ");
+                "i will never stop asking for extra points we all need a 5 from this subject", " Me   ", null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
             var movie2 =  new Movie(1, "   title   ", "Poland", 111111, "a very nice amazing movie please give us max points ",
-                "Julia Marczak", AgeRestrictionType.PG13);
+                "Julia Marczak", AgeRestrictionType.PG13, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
 
             var extent = Movie.GetMovies();
 
@@ -90,7 +90,7 @@ namespace TestByt;
         public void Encapsulation_ShouldPreventDirectModificationOfPrivateFields()
         {
             var movie = new Movie(1, "Original title", "Poland", 120,
-                "Some description", "Some Director");
+                "Some description", "Some Director",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
 
             var titleField = typeof(Movie)
                 .GetField("_title", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -108,17 +108,13 @@ namespace TestByt;
                 File.Delete(path);
 
             var m1 = new Movie(1, "movie uno", "pollaaand", 100,
-                "we all have bsi tomorrow so it couuld be possible the documentation will be bad", "idk");
+                "we all have bsi tomorrow so it couuld be possible the documentation will be bad", "idk",null, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
             var m2 = new Movie(2, "movie dos", "jej", 120,
-                "second ", "not sure", AgeRestrictionType.PG13);
+                "second ", "not sure", AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
 
             Movie.Save(path);
-
-            // Clear current extent
             Movie.ClearMovies();
             Assert.AreEqual(0, Movie.GetMovies().Count);
-
-            // Load from file
             var loaded = Movie.Load(path);
             var extent = Movie.GetMovies();
 
