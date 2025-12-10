@@ -14,8 +14,11 @@ public class Movie
     private string _description;
     private string _director;
     private static List<Movie> MoviesList = new List<Movie>();
+    
     public AgeRestrictionType? AgeRestriction { get; set; }
-    private HashSet<ReviewPage> _reviews = new HashSet<ReviewPage>();
+    private HashSet<ReviewPage> _reviews = new();
+    [XmlIgnore]
+    public HashSet<ReviewPage> Reviews => new(_reviews); 
     
     [XmlIgnore]
     private HashSet<Screening> _screenings = new();
@@ -166,40 +169,32 @@ public class Movie
     }
     public HashSet<ReviewPage> GetReviews()
     {
-        return new HashSet<ReviewPage>(_reviews); // Return COPY (slides rule)
+        return new HashSet<ReviewPage>(_reviews); 
     }
     public void AddReview(ReviewPage review)
     {
         if (review == null)
             throw new ArgumentException("Review cannot be null.");
-
         if (_reviews.Contains(review))
             throw new InvalidOperationException("This review is already linked with the movie.");
-
         _reviews.Add(review);
-        review.SetMovieInternal(this);
+        if (review.Movie != this)
+            review.SetMovie(this);
     }
+
     public void RemoveReview(ReviewPage review)
     {
         if (review == null)
             throw new ArgumentException("Review cannot be null.");
 
         if (!_reviews.Contains(review))
-            throw new InvalidOperationException("This review is not associated with the movie.");
+            throw new InvalidOperationException("This review is not associated with this movie.");
 
         _reviews.Remove(review);
-        review.RemoveMovieInternal(this);
+        if (review.Movie == this)
+            review.RemoveMovie();
     }
-    internal void AddReviewInternal(ReviewPage review)
-    {
-        _reviews.Add(review);
-    }
-
-    internal void RemoveReviewInternal(ReviewPage review)
-    {
-        _reviews.Remove(review);
-    }
-
+    
     public void AddScreening(Screening screening)
     {
         if (screening == null)

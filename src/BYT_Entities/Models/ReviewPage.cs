@@ -190,19 +190,14 @@ public class ReviewPage
             throw new ArgumentException("Movie cannot be null.");
 
         if (Movie == movie)
-            return;
-
-        Movie? oldMovie = Movie;
-
-        if (oldMovie != null)
+            return;  
+        if (Movie != null)
         {
-            Movie = null;
-            oldMovie.RemoveReviewInternal(this);
+            Movie.RemoveReview(this); 
         }
-
         Movie = movie;
         if (!movie.GetReviews().Contains(this))
-            movie.AddReviewInternal(this);
+            movie.AddReview(this);
     }
     public void RemoveMovie()
     {
@@ -211,9 +206,8 @@ public class ReviewPage
 
         Movie oldMovie = Movie;
         Movie = null;
-
         if (oldMovie.GetReviews().Contains(this))
-            oldMovie.RemoveReviewInternal(this);
+            oldMovie.RemoveReview(this);
     }
     internal void SetMovieInternal(Movie movie)
     {
