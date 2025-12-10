@@ -209,14 +209,5 @@ public class ReviewPage
         if (oldMovie.GetReviews().Contains(this))
             oldMovie.RemoveReview(this);
     }
-    internal void SetMovieInternal(Movie movie)
-    {
-        Movie = movie;
-    }
-
-    internal void RemoveMovieInternal(Movie movie)
-    {
-        if (Movie == movie)
-            Movie = null;
-    }
+  
 }
