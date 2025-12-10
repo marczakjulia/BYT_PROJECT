@@ -15,6 +15,7 @@ public class Auditorium
     private Cinema _cinema;
     [XmlIgnore]
     public Cinema Cinema { get; set; }
+    
     [XmlIgnore]
     private HashSet<Screening> _screenings = new();
 
@@ -84,7 +85,7 @@ public class Auditorium
         }
     }
 
-    [XmlIgnore] public HashSet<Seat> Seats => new(_seats); // Return copy
+    [XmlIgnore] public HashSet<Seat> Seats => new(_seats);
 
     public void SetSeat(Seat seat)
     {
@@ -98,23 +99,6 @@ public class Auditorium
 
         if (seat.Auditorium != this)
             seat.SetAuditorium(this);
-    }
-
-    public void RemoveSeat(Seat seat)
-    {
-        if (seat == null)
-            throw new ArgumentException("Seat cannot be null.");
-
-        if (_seats.Count <= 12)
-            throw new InvalidOperationException("Cannot remove seat. Auditorium must have at least 12 seats.");
-
-        if (!_seats.Contains(seat))
-            throw new InvalidOperationException("Seat not found in this auditorium.");
-
-        _seats.Remove(seat);
-
-        if (seat.Auditorium == this)
-            seat.RemoveAuditorium();
     }
 
     public void ClearAuditorium()
@@ -138,13 +122,11 @@ public class Auditorium
         if (screening == null)
             throw new ArgumentException("Screening cannot be null.");
 
-        if (_screenings.Contains(screening))
-            return;
-
-        _screenings.Add(screening);
-
-        if (screening.Auditorium != this)
-            screening.SetAuditoriumInternal(this);
+        if (_screenings.Add(screening))
+        {
+            if (screening.Auditorium != this)
+                screening.SetAuditorium(this);
+        }
     }
 
     public void RemoveScreening(Screening screening)
@@ -152,37 +134,60 @@ public class Auditorium
         if (screening == null)
             throw new ArgumentException("Screening cannot be null.");
 
-        if (!_screenings.Contains(screening))
+        if (_screenings.Remove(screening))
+        {
+            if (screening.Auditorium == this)
+                screening.RemoveAuditorium();
+        }
+    }
+
+
+    public void AddSeat(Seat seat)
+    {
+        if (seat == null)
+            throw new ArgumentException("Cannot add null seat.");
+
+        if (_seats.Contains(seat))
             return;
 
-        _screenings.Remove(screening);
+        _seats.Add(seat);
 
-        if (screening.Auditorium == this)
-            screening.RemoveAuditoriumInternal(this);
+        // Ensure bidirectional link
+        if (seat.Auditorium != this)
+            seat.SetAuditorium(this);
     }
 
-    internal void AddScreeningInternal(Screening screening)
+    public void RemoveSeat(Seat seat)
     {
-        _screenings.Add(screening);
+        if (seat == null)
+            throw new ArgumentException("Seat cannot be null.");
+
+        if (!_seats.Contains(seat))
+            throw new InvalidOperationException("Seat not found in this auditorium.");
+
+        if (_seats.Count <= 12)
+            throw new InvalidOperationException("Auditorium must have at least 12 seats.");
+
+        _seats.Remove(seat);
+
+        if (seat.Auditorium == this)
+            seat.RemoveAuditorium();
     }
 
-    internal void RemoveScreeningInternal(Screening screening)
-    {
-        _screenings.Remove(screening);
-    }
-
-
-    public void SetSeats(HashSet<Seat> seats)
+    public void SetSeats(IEnumerable<Seat> seats)
     {
         if (seats == null)
             throw new ArgumentException("Seats cannot be null.");
 
-        if (seats.Count < 12)
-            throw new ArgumentException("There must be at least 12 seats");
+        var seatList = seats.ToList();
+        if (seatList.Count < 12)
+            throw new ArgumentException("There must be at least 12 seats.");
 
-        foreach (var seat in _seats.ToList()) RemoveSeat(seat);
+        foreach (var seat in _seats.ToList())
+            RemoveSeat(seat);
 
-        foreach (var seat in seats) SetSeat(seat);
+        foreach (var seat in seatList)
+            AddSeat(seat);
     }
 
     private static void AddAuditorium(Auditorium auditorium)
@@ -231,13 +236,5 @@ public class Auditorium
         }
 
         return true;
-    }
-
-    public void AddSeat(Seat seat)
-    {
-        if (seat == null)
-            throw new ArgumentException("Cannot add null seat.");
-
-        _seats.Add(seat);
     }
 }

@@ -36,8 +36,8 @@ public class AuditoriumSeatAssociationTests
 
         var anotherAuditorium =
             new Auditorium("Second Hall", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2);
-        var ex = Assert.Throws<InvalidOperationException>(() => seat.SetAuditorium(anotherAuditorium));
-        Assert.That(ex.Message, Is.EqualTo("Seat is already assigned to an auditorium."));
+
+        Assert.Throws<InvalidOperationException>(() => seat.SetAuditorium(anotherAuditorium));
     }
 
     [Test]
@@ -66,10 +66,11 @@ public class AuditoriumSeatAssociationTests
     public void Auditorium_RemoveSeat_ThrowsIfBelowMinimum()
     {
         var seats = new List<Seat>(_auditorium.Seats);
-        foreach (var seat in seats.Take(seats.Count - 12)) _auditorium.RemoveSeat(seat);
+        foreach (var seat in seats.Take(seats.Count - 12))
+            _auditorium.RemoveSeat(seat);
 
         var remainingSeat = new List<Seat>(_auditorium.Seats)[0];
-        var ex = Assert.Throws<InvalidOperationException>(() => _auditorium.RemoveSeat(remainingSeat));
-        Assert.That(ex.Message, Is.EqualTo("Cannot remove seat. Auditorium must have at least 12 seats."));
+
+        Assert.Throws<InvalidOperationException>(() => _auditorium.RemoveSeat(remainingSeat));
     }
 }

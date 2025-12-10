@@ -27,7 +27,7 @@ public class AuditoriumMovieAssociationTests
         var auditorium = new Auditorium("Aud2", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2);
         var screening = new Screening(2, movie, auditorium, DateTime.Now.AddDays(2), TimeSpan.FromHours(20), ScreeningFormat._3D, ScreeningVersion.Dubbing);
 
-        screening.RemoveScreeningFromAssociations();
+        screening.RemoveCompletely();
 
         Assert.IsFalse(movie.Screenings.Contains(screening));
         Assert.IsFalse(auditorium.Screenings.Contains(screening));

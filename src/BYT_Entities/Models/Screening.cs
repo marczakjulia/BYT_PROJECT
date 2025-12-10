@@ -125,9 +125,6 @@ public class Screening
             _status = value;
         }
     }
-
-    //read-only
-    // public Dictionary<string, Ticket> TicketsBySeatCode { get; }
     
     public void CreateTickets(decimal price)
     {
@@ -142,60 +139,88 @@ public class Screening
 
     public void AddTicket(string seatCode, Ticket ticket)
     {
-        if (ticket == null) throw new ArgumentException( "Ticket cannot be null.");
+        if (ticket == null) 
+            throw new ArgumentException( "Ticket cannot be null.");
         if (_ticketsBySeatCode.ContainsKey(seatCode))
             throw new InvalidOperationException($"A ticket for seat {seatCode} already exists.");
 
+        if (ticket.Screening != null && ticket.Screening != this)
+            throw new InvalidOperationException("Ticket belongs to another screening.");
+
         _ticketsBySeatCode.Add(seatCode, ticket);
-        ticket.SetScreeningInternal(this, seatCode);
+
+        // reverse update
+        if (ticket.Screening != this || ticket.SeatCode != seatCode)
+            ticket.SetScreening(this, seatCode);
     }
+
 
     public void RemoveTicket(string seatCode)
     {
-        if (_ticketsBySeatCode.TryGetValue(seatCode, out var ticket))
+        if (_ticketsBySeatCode.Remove(seatCode, out var ticket))
         {
-            ticket.RemoveScreeningInternal();
-            _ticketsBySeatCode.Remove(seatCode);
+            if (ticket.Screening == this)
+                ticket.RemoveScreening();
+        }
+    }
+    
+    public void SetMovie(Movie movie)
+    {
+        if (movie == null)
+            throw new ArgumentException("Movie cannot be null.");
+
+        if (Movie != null && Movie != movie)
+            Movie.RemoveScreening(this);
+
+        Movie = movie;
+
+        if (!movie.Screenings.Contains(this))
+            movie.AddScreening(this);
+    }
+
+    public void RemoveMovie()
+    {
+        if (Movie != null)
+        {
+            var oldMovie = Movie;
+            _movie = null; 
+            if (oldMovie.Screenings.Contains(this))
+                oldMovie.RemoveScreening(this);
         }
     }
 
 
-    internal void SetMovieInternal(Movie movie)
+    public void SetAuditorium(Auditorium auditorium)
     {
-        _movie = movie;
-        movie.AddScreeningInternal(this);
+        if (auditorium == null)
+            throw new ArgumentException("Auditorium cannot be null.");
+
+        if (Auditorium != null && Auditorium != auditorium)
+            Auditorium.RemoveScreening(this);
+
+        Auditorium = auditorium;
+
+        if (!auditorium.Screenings.Contains(this))
+            auditorium.AddScreening(this);
     }
 
-    internal void RemoveMovieInternal(Movie movie)
+    public void RemoveAuditorium()
     {
-        if (_movie == movie)
-            _movie = null;
+        if (Auditorium != null)
+        {
+            var oldAuditorium = Auditorium;
 
-        movie.RemoveScreeningInternal(this);
-    }
-
-    internal void SetAuditoriumInternal(Auditorium auditorium)
-    {
-        _auditorium = auditorium;
-        auditorium.AddScreeningInternal(this);
-    }
-
-    internal void RemoveAuditoriumInternal(Auditorium auditorium)
-    {
-        if (_auditorium == auditorium)
             _auditorium = null;
 
-        auditorium.RemoveScreeningInternal(this);
+            if (oldAuditorium.Screenings.Contains(this))
+                oldAuditorium.RemoveScreening(this);
+        }
     }
-
-    // created remove func specifically for association tests, otherwise got an error about 'cannot access internal method' 
-    public void RemoveScreeningFromAssociations()
+    
+    public void RemoveCompletely()
     {
-        if (_movie != null)
-            _movie.RemoveScreeningInternal(this);
-
-        if (_auditorium != null)
-            _auditorium.RemoveScreeningInternal(this); 
+        RemoveMovie();
+        RemoveAuditorium();
     }
 
     private static void AddScreening(Screening screening)
