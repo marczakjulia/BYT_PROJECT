@@ -212,8 +212,8 @@ public class Movie
 
         _screenings.Add(screening);
 
-        if (screening.Movie != this)
-            screening.SetMovieInternal(this);
+       // if (screening.Movie != this)
+            // screening.SetMovieInternal(this);
     }
 
     public void RemoveScreening(Screening screening)
@@ -226,8 +226,8 @@ public class Movie
 
         _screenings.Remove(screening);
 
-        if (screening.Movie == this)
-            screening.RemoveMovieInternal(this);
+       // if (screening.Movie == this)
+        //    screening.RemoveMovieInternal(this);
     }
 
     internal void AddScreeningInternal(Screening screening)
