@@ -15,70 +15,32 @@ public class Screening
     private TimeSpan _startTime;
     private ScreeningStatus _status;
     private ScreeningVersion _version;
+    
+    private readonly Dictionary<string, Ticket> _ticketsBySeatCode = new();
+    public IReadOnlyDictionary<string, Ticket> TicketsBySeatCode => _ticketsBySeatCode;
 
     public Screening(int id, Movie movie, Auditorium auditorium, DateTime date, TimeSpan startTime,
         ScreeningFormat format, ScreeningVersion version)
     {
         Id = id;
-        Movie = movie;
-        Auditorium = auditorium;
+        Movie = movie ?? throw new ArgumentException("Movie cannot be null");
+        movie.AddScreening(this);
+
+        Auditorium = auditorium ?? throw new ArgumentException("Auditorium cannot be null");
+        auditorium.AddScreening(this);
+
         Date = date;
         StartTime = startTime;
         Format = format;
         Version = version;
         Status = ScreeningStatus.Planned;
-        TicketsBySeatCode = new Dictionary<string, Ticket>();
-        
+
         AddScreening(this);
     }
-    public Screening(){}
 
-    private static void AddScreening(Screening screening)
+
+    public Screening()
     {
-        if (screening == null)
-            throw new ArgumentException("Screening cannot be null.");
-
-        _screenings.Add(screening);
-    }
-
-    public static void Save(string path = "screening.xml")
-    {
-        var file = File.CreateText(path);
-        var serializer = new XmlSerializer(typeof(List<Screening>));
-        using (var writer = new XmlTextWriter(file))
-        {
-            serializer.Serialize(writer, _screenings);
-        }
-    }
-
-    public static bool Load(string path = "screening.xml")
-    {
-        StreamReader file;
-        try
-        {
-            file = File.OpenText(path);
-        }
-        catch (FileNotFoundException)
-        {
-            _screenings.Clear();
-            return false;
-        }
-
-        var serializer = new XmlSerializer(typeof(List<Screening>));
-        using (var reader = new XmlTextReader(file))
-        {
-            try
-            {
-                _screenings = (List<Screening>)serializer.Deserialize(reader);
-            }
-            catch (InvalidCastException)
-            {
-                _screenings.Clear();
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public int Id { get; set; }
@@ -89,7 +51,7 @@ public class Screening
         set
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(Movie), "Movie cannot be null.");
+                throw new ArgumentException("Movie cannot be null.");
             _movie = value;
         }
     }
@@ -100,7 +62,7 @@ public class Screening
         set
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(Auditorium), "Auditorium cannot be null.");
+                throw new ArgumentException("Auditorium cannot be null.");
             _auditorium = value;
         }
     }
@@ -163,26 +125,175 @@ public class Screening
             _status = value;
         }
     }
+    
+    public void CreateTickets(decimal price)
+    {
+        int ticketId = 1;
 
-    //read-only
-    public Dictionary<string, Ticket> TicketsBySeatCode { get; }
+        foreach (var seat in Auditorium.Seats)
+        {
+            var ticket = new Ticket(price, ticketId++);
+            AddTicket(seat.Code, ticket);
+        }
+    }
+
+    public void AddTicket(string seatCode, Ticket ticket)
+    {
+        if (ticket == null) 
+            throw new ArgumentException( "Ticket cannot be null.");
+        if (_ticketsBySeatCode.ContainsKey(seatCode))
+            throw new InvalidOperationException($"A ticket for seat {seatCode} already exists.");
+
+        if (ticket.Screening != null && ticket.Screening != this)
+            throw new InvalidOperationException("Ticket belongs to another screening.");
+
+        _ticketsBySeatCode.Add(seatCode, ticket);
+
+        // reverse update
+        if (ticket.Screening != this || ticket.SeatCode != seatCode)
+            ticket.SetScreening(this, seatCode);
+    }
+
+
+    public void RemoveTicket(string seatCode)
+    {
+        if (_ticketsBySeatCode.Remove(seatCode, out var ticket))
+        {
+            if (ticket.Screening == this)
+                ticket.RemoveScreening();
+        }
+    }
+    
+    public void SetMovie(Movie movie)
+    {
+        if (movie == null)
+            throw new ArgumentException("Movie cannot be null.");
+
+        if (_movie == movie)
+            return;
+
+        if (_movie != null)
+            _movie.RemoveScreening(this);
+
+        _movie = movie;
+
+        if (!movie.Screenings.Contains(this))
+            movie.AddScreening(this);
+    }
+
+
+
+    public void RemoveMovie()
+    {
+        if (_movie == null)
+            return;
+
+        var oldMovie = _movie;
+        _movie = null;
+
+        if (oldMovie.Screenings.Contains(this))
+            oldMovie.RemoveScreening(this);
+    }
+
+
+    public void SetAuditorium(Auditorium auditorium)
+    {
+        if (auditorium == null)
+            throw new ArgumentException("Auditorium cannot be null.");
+
+        if (_auditorium == auditorium)
+            return;
+
+        if (_auditorium != null)
+            _auditorium.RemoveScreening(this);
+
+        _auditorium = auditorium;
+
+        auditorium.AddScreening(this);
+    }
+
+
+    public void RemoveAuditorium()
+    {
+        if (_auditorium == null)
+            return;
+        
+        var oldAuditorium = _auditorium;
+        _auditorium = null;
+
+        oldAuditorium.RemoveScreening(this);
+    }
+
+    
+    public void RemoveCompletely()
+    {
+        RemoveMovie();
+        RemoveAuditorium();
+    }
+
+    private static void AddScreening(Screening screening)
+    {
+        if (screening == null)
+            throw new ArgumentException("Screening cannot be null.");
+
+        _screenings.Add(screening);
+    }
+
+    public static void Save(string path = "screening.xml")
+    {
+        var file = File.CreateText(path);
+        var serializer = new XmlSerializer(typeof(List<Screening>));
+        using (var writer = new XmlTextWriter(file))
+        {
+            serializer.Serialize(writer, _screenings);
+        }
+    }
+
+    public static bool Load(string path = "screening.xml")
+    {
+        StreamReader file;
+        try
+        {
+            file = File.OpenText(path);
+        }
+        catch (FileNotFoundException)
+        {
+            _screenings.Clear();
+            return false;
+        }
+
+        var serializer = new XmlSerializer(typeof(List<Screening>));
+        using (var reader = new XmlTextReader(file))
+        {
+            try
+            {
+                _screenings = (List<Screening>)serializer.Deserialize(reader);
+            }
+            catch (InvalidCastException)
+            {
+                _screenings.Clear();
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public void CreateScreening(decimal price)
     {
-        if (TicketsBySeatCode.Count > 0)
+        if (_ticketsBySeatCode.Count > 0)
             throw new InvalidOperationException("Tickets have already been created");
 
         var ticketId = 1;
 
         foreach (var seat in Auditorium.Seats)
         {
-            TicketsBySeatCode.Add(seat.Code, new Ticket(price, ticketId));
-            ticketId++;
+            var ticket = new Ticket(price, ticketId++);
+            _ticketsBySeatCode.Add(seat.Code, ticket);
         }
-
-
         Status = ScreeningStatus.Planned;
     }
+
 
     public void StartScreening()
     {

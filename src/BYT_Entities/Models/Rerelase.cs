@@ -11,6 +11,9 @@ public class Rerelease
     private DateTime _reReleaseDate;
     public bool? Remastered { get; set; }
     private static List<Rerelease> Rereleases = new List<Rerelease>();
+    [XmlIgnore]
+    public Movie? Movie { get; private set; }
+
     public string Reason
     {
         get => _reason;
@@ -102,4 +105,39 @@ public class Rerelease
     {
         Rereleases.Clear();
     }
+    public void SetMovie(Movie movie)
+    {
+        if (movie == null)
+            throw new ArgumentException("Movie cannot be null.");
+
+        if (Movie == movie)
+            return;
+
+        if (Movie != null)
+            throw new InvalidOperationException("This rerelease is already assigned to a movie.");
+
+        if (movie.Rerelease != null && movie.Rerelease != this)
+            throw new InvalidOperationException("This movie already has a rerelease.");
+
+        if (movie.NewRelease != null)
+            throw new InvalidOperationException("Movie already has a new release. Cannot assign a rerelease.");
+
+        Movie = movie;
+
+        if (movie.Rerelease != this)
+            movie.SetRerelease(this);
+    }
+    public void RemoveMovie()
+    {
+        if (Movie == null)
+            return;
+
+        var movieToRemove = Movie;
+        Movie = null;
+
+        if (movieToRemove.Rerelease == this)
+            movieToRemove.RemoveRerelease();
+    }
+
+
 }

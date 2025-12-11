@@ -10,6 +10,9 @@ public class NewRelease
     public bool IsExclusiveToCinema { get; set; }
     private DateTime _premiereDate;
     private string _distributor;
+    [XmlIgnore]
+    public Movie? Movie { get; private set; }
+
     public DateTime PremiereDate
     {
         get => _premiereDate;
@@ -100,4 +103,60 @@ public class NewRelease
         }
         return true;
     }
+    public void SetMovie(Movie movie)
+    {
+        if (movie == null)
+            throw new ArgumentException("movie cannot be null.");
+
+        if (Movie == movie)
+            return;
+
+        if (Movie != null)
+            throw new InvalidOperationException("this newrelease already is connected to a movie.");
+
+        if (movie.NewRelease != null && movie.NewRelease != this)
+            throw new InvalidOperationException("this movie is already connected with another new release.");
+
+        Movie = movie;
+
+        if (movie.NewRelease != this)
+            movie.SetNewRelease(this);
+    }
+
+    public void RemoveMovie()
+    {
+        if (Movie == null)
+            return;
+
+        var movieToRemove = Movie;
+        Movie = null;
+
+        if (movieToRemove.NewRelease == this)
+            movieToRemove.RemoveNewRelease();
+    }
+
+    public void UpdateMovie(Movie newMovie)
+    {
+        if (newMovie == null)
+            throw new ArgumentException("new movie cannot be null.");
+
+        if (Movie == newMovie)
+            return;
+
+        if (newMovie.NewRelease != null && newMovie.NewRelease != this)
+            throw new InvalidOperationException("this movie is already connected with another new release.");
+
+        var oldMovie = Movie;
+        if (oldMovie != null)
+        {
+            Movie = null;
+            if (oldMovie.NewRelease == this)
+                oldMovie.RemoveNewRelease();
+        }
+
+        Movie = newMovie;
+        if (newMovie.NewRelease != this)
+            newMovie.SetNewRelease(this);
+    }
+
 }

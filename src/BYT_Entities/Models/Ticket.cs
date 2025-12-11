@@ -12,6 +12,11 @@ public class Ticket
     private decimal _price;
     private string? _reasonOfRefundOrExpiration;
     private TicketStatus _status;
+    
+    [XmlIgnore]
+    public Screening Screening { get; private set; }
+    [XmlIgnore]
+    public string SeatCode { get; private set; }
 
     public Ticket(decimal price, int id)
     {
@@ -23,11 +28,7 @@ public class Ticket
 
         AddTicket(this);
     }
-
-    public Ticket()
-    {
-    }
-
+    
     public Ticket(decimal price, TicketStatus status, TicketPaymentType paymentType, int id, string? reason = null)
     {
         Price = price;
@@ -42,6 +43,10 @@ public class Ticket
         Id = id;
 
         AddTicket(this);
+    }
+    
+    public Ticket()
+    {
     }
 
     public int Id { get; set; }
@@ -114,6 +119,77 @@ public class Ticket
 
         _tickets.Add(ticket);
     }
+    
+    public void SetScreening(Screening screening, string seatCode)
+    {
+        Screening = screening ?? throw new ArgumentException("Screening cannot be null.");
+        SeatCode = seatCode ?? throw new ArgumentException("SeatCode cannot be null.");
+        
+        if (Screening == screening && SeatCode == seatCode)
+            return;
+
+        if (Screening != null && Screening != screening)
+            throw new InvalidOperationException("This ticket is already assigned to another screening.");
+
+        if (screening.TicketsBySeatCode.ContainsKey(seatCode) && screening.TicketsBySeatCode[seatCode] != this)
+            throw new InvalidOperationException($"Seat {seatCode} already has a ticket.");
+
+        Screening = screening;
+        SeatCode = seatCode;
+
+        if (!screening.TicketsBySeatCode.ContainsKey(seatCode))
+            screening.AddTicket(seatCode, this);
+    }
+
+    public void RemoveScreening()
+    {
+        if (Screening == null)
+            return;
+
+        var oldScreening = Screening;
+        var oldSeat = SeatCode;
+
+        Screening = null;
+        SeatCode = null;
+
+        if (oldScreening.TicketsBySeatCode.ContainsKey(oldSeat) &&
+            oldScreening.TicketsBySeatCode[oldSeat] == this)
+        {
+            oldScreening.RemoveTicket(oldSeat);
+        }
+    }
+
+    public void AddReview(ReviewPage reviewPage)
+    {
+        if (reviewPage == null)
+            throw new ArgumentException("Review page cannot be null.");
+
+        if (ReviewPage == reviewPage)
+            return;
+
+        if (ReviewPage != null)
+            throw new InvalidOperationException("Ticket has already has a review page.");
+
+        if (reviewPage.Ticket != null && reviewPage.Ticket != this)
+            throw new InvalidOperationException("This review is already associated with another ticket.");
+
+        ReviewPage = reviewPage;
+
+        //creating reverse connection
+        if (reviewPage.Ticket != this)
+            reviewPage.SetTicket(this);
+    }
+
+    public void RemoveReview()
+    {
+        if (ReviewPage == null)
+            return;
+        var reviewPageToRemove = ReviewPage;
+        ReviewPage = null;
+
+        if (reviewPageToRemove.Ticket == this)
+            reviewPageToRemove.RemoveTicket();
+    }
 
     public static void Save(string path = "ticket.xml")
     {
@@ -154,39 +230,7 @@ public class Ticket
 
         return true;
     }
-
-    public void AddReview(ReviewPage reviewPage)
-    {
-        if (reviewPage == null)
-            throw new ArgumentException("Review page cannot be null.");
-
-        if (ReviewPage == reviewPage)
-            return;
-
-        if (ReviewPage != null)
-            throw new InvalidOperationException("Ticket has already has a review page.");
-
-        if (reviewPage.Ticket != null && reviewPage.Ticket != this)
-            throw new InvalidOperationException("This review is already associated with another ticket.");
-
-        ReviewPage = reviewPage;
-
-        //creating reverse connection
-        if (reviewPage.Ticket != this)
-            reviewPage.SetTicket(this);
-    }
-
-    public void RemoveReview()
-    {
-        if (ReviewPage == null)
-            return;
-        var reviewPageToRemove = ReviewPage;
-        ReviewPage = null;
-
-        if (reviewPageToRemove.Ticket == this)
-            reviewPageToRemove.RemoveTicket();
-    }
-
+    
     public void UpdateReview(ReviewPage newReview)
     {
         if (newReview == null)

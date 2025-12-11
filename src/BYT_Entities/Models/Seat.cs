@@ -66,16 +66,18 @@ public class Seat
     public void SetAuditorium(Auditorium auditorium)
     {
         if (auditorium == null)
-            throw new ArgumentException("Auditorium can not be null.");
+            throw new ArgumentException("Auditorium cannot be null.");
 
         if (_auditorium == auditorium)
             return;
 
         if (_auditorium != null)
-            throw new InvalidOperationException("Seat is already assigned to an auditorium.");
+            throw new InvalidOperationException("Seat is already assigned to another auditorium.");
 
         _auditorium = auditorium;
-        auditorium.SetSeat(this);
+
+        if (!auditorium.Seats.Contains(this))
+            auditorium.AddSeat(this);
     }
 
     public void RemoveAuditorium()
@@ -83,10 +85,11 @@ public class Seat
         if (_auditorium == null)
             return;
 
-        var auditoriumToRemove = _auditorium;
+        var oldAuditorium = _auditorium;
         _auditorium = null;
 
-        auditoriumToRemove.RemoveSeat(this);
+        if (oldAuditorium.Seats.Contains(this))
+            oldAuditorium.RemoveSeat(this);
     }
 
     private static void AddSeats(Seat seat)

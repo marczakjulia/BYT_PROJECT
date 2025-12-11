@@ -25,13 +25,13 @@ public class ScreeningTests
             _auditorium.SetSeat(seat); 
         }
 
-        _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13);
+        _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
     }
 
     [Test]
     public void MovieIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             new Screening(1, null, _auditorium, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Subtitles));
     }
@@ -39,7 +39,7 @@ public class ScreeningTests
     [Test]
     public void AuditoriumIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() =>
+        Assert.Throws<ArgumentException>(() =>
             new Screening(1, _movie, null, DateTime.Now.Date.AddDays(1), new TimeSpan(14, 30, 0),
                 ScreeningFormat._2D, ScreeningVersion.Original));
     }
