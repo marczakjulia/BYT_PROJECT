@@ -1,71 +1,117 @@
-﻿namespace TestByt;
+﻿using BYT_Entities.Models;
 
-using BYT_Entities.Models;
+namespace TestByt;
 
-
-public class ManagerAssociationTests
+public class ManagerTests
 {
+    private Manager boss;
+    private Manager lead;
+    private Manager worker;
+
     [SetUp]
-    public void SetUp()
+    public void Setup()
     {
         Manager.ClearManagers();
+
+        boss = new Manager(1, "HQ", 9000, 0.2);
+        lead = new Manager(2, "IT", 6000, 0.1);
+        worker = new Manager(3, "IT", 4000, 0.05);
     }
 
     [Test]
-    public void SetSupervisor_CreatesReverseConnection()
+    public void SetSupervisor_ShouldCreateReverseConnection()
     {
-        var m1 = new Manager(1, "Sales", 5000, 0.1);
-        var m2 = new Manager(2, "Sales", 4500, 0.1);
+        lead.SetSupervisor(boss);
 
-        m2.SetSupervisor(m1);
-
-        Assert.That(m2.GetSupervisor(), Is.EqualTo(m1));
-        Assert.That(m1.GetSubordinates().Contains(m2));
+        Assert.AreEqual(boss, lead.GetSupervisor());
+        Assert.IsTrue(boss.GetSubordinates().Contains(lead));
     }
 
     [Test]
-    public void AddSubordinate_CreatesReverseConnection()
+    public void RemoveSupervisor_ShouldRemoveReverseConnection()
     {
-        var m1 = new Manager(1, "Sales", 5000, 0.1);
-        var m2 = new Manager(2, "Sales", 4500, 0.1);
+        lead.SetSupervisor(boss);
 
-        m1.AddSubordinate(m2);
+        lead.SetSupervisor(null);
 
-        Assert.That(m1.GetSubordinates().Contains(m2));
-        Assert.That(m2.GetSupervisor(), Is.EqualTo(m1));
+        Assert.IsNull(lead.GetSupervisor());
+        Assert.IsFalse(boss.GetSubordinates().Contains(lead));
     }
 
     [Test]
-    public void RemoveSupervisor_RemovesReverseConnection()
+    public void AddSubordinate_ShouldCreateReverseConnection()
     {
-        var m1 = new Manager(1, "Sales", 5000, 0.1);
-        var m2 = new Manager(2, "Sales", 4500, 0.1);
+        boss.AddSubordinate(lead);
 
-        m2.SetSupervisor(m1);
-        m2.SetSupervisor(null);
-
-        Assert.That(m2.GetSupervisor(), Is.Null);
-        Assert.That(!m1.GetSubordinates().Contains(m2));
+        Assert.AreEqual(boss, lead.GetSupervisor());
+        Assert.IsTrue(boss.GetSubordinates().Contains(lead));
     }
 
     [Test]
-    public void RemoveSubordinate_RemovesReverseConnection()
+    public void RemoveSubordinate_ShouldRemoveReverseConnection()
     {
-        var m1 = new Manager(1, "Sales", 5000, 0.1);
-        var m2 = new Manager(2, "Sales", 4500, 0.1);
+        boss.AddSubordinate(lead);
 
-        m1.AddSubordinate(m2);
-        m1.RemoveSubordinate(m2);
+        boss.RemoveSubordinate(lead);
 
-        Assert.That(!m1.GetSubordinates().Contains(m2));
-        Assert.That(m2.GetSupervisor(), Is.Null);
+        Assert.IsNull(lead.GetSupervisor());
+        Assert.IsFalse(boss.GetSubordinates().Contains(lead));
     }
 
     [Test]
-    public void ManagerCannotBeOwnSupervisor()
+    public void ChangingSupervisor_ShouldRemoveOldAndSetNewLinks()
     {
-        var m = new Manager(1, "Sales", 5000, 0.1);
-        var ex = Assert.Throws<InvalidOperationException>(() => m.SetSupervisor(m));
-        Assert.That(ex.Message, Does.Contain("cannot supervise themselves"));
+        lead.SetSupervisor(boss);
+        lead.SetSupervisor(worker);
+
+        Assert.AreEqual(worker, lead.GetSupervisor());
+        Assert.IsFalse(boss.GetSubordinates().Contains(lead));
+        Assert.IsTrue(worker.GetSubordinates().Contains(lead));
+    }
+
+    [Test]
+    public void SetSupervisor_ShouldThrow_WhenSupervisorIsSelf()
+    {
+        Assert.Throws<InvalidOperationException>(() => boss.SetSupervisor(boss));
+    }
+
+    [Test]
+    public void AddSubordinate_ShouldThrow_WhenAddingSelf()
+    {
+        Assert.Throws<InvalidOperationException>(() => boss.AddSubordinate(boss));
+    }
+
+    [Test]
+    public void AddSubordinateTwice_ShouldThrow()
+    {
+        boss.AddSubordinate(lead);
+
+        Assert.Throws<InvalidOperationException>(() => boss.AddSubordinate(lead));
+    }
+
+    [Test]
+    public void RemoveNonExistingSubordinate_ShouldThrow()
+    {
+        Assert.Throws<InvalidOperationException>(() => boss.RemoveSubordinate(lead));
+    }
+
+    [Test]
+    public void SetSameSupervisorTwice_ShouldThrow()
+    {
+        lead.SetSupervisor(boss);
+
+        Assert.Throws<InvalidOperationException>(() => lead.SetSupervisor(boss));
+    }
+
+    [Test]
+    public void AddSubordinate_ShouldThrow_WhenNull()
+    {
+        Assert.Throws<ArgumentException>(() => boss.AddSubordinate(null!));
+    }
+
+    [Test]
+    public void RemoveSubordinate_ShouldThrow_WhenNull()
+    {
+        Assert.Throws<ArgumentException>(() => boss.RemoveSubordinate(null!));
     }
 }

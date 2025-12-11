@@ -37,6 +37,12 @@ public class Auditorium
 
         cinema.AddAuditorium(this);
     }
+    
+    public static List<Auditorium> GetAll()
+    {
+        return new List<Auditorium>(_auditorium);
+    }
+
     //needed for compisition
     public static void RemoveFromGlobalList(Auditorium auditorium)
     {
@@ -126,7 +132,7 @@ public class Auditorium
             seat.SetAuditorium(this);
     }
 
-    public void ClearAuditorium()
+    public static void ClearAuditorium()
     {
         _auditorium.Clear();
     }

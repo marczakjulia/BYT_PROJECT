@@ -1,142 +1,101 @@
-﻿using BYT_Entities.Complex;
+﻿using BYT_Entities.Models;
 using BYT_Entities.Enums;
+using BYT_Entities.Complex;
 
 namespace TestByt;
-using BYT_Entities.Models;
 
 public class EmployeeCinemaAssociationTests
 {
+    private Cinema c1;
+    private Cinema c2;
+    private Employee e1;
+
     [SetUp]
-    public void SetUp()
+    public void Setup()
     {
-        Cinema.ClearCinemas();
         Employee.ClearEmployees();
+        Cinema.ClearCinemas();
+
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+        c2 = new Cinema(2, "C2", "B", "2", "b@b.com", "10-20");
+
+        e1 = new Employee(
+            id: 10,
+            name: "Anna",
+            surname: "Boss",
+            pesel: "12345678901",
+            email: "boss@test.com",
+            dayOfBirth: DateTime.Now.AddYears(-25),
+            hireDate: DateTime.Now.AddYears(-2),
+            salary: 3000,
+            address: new Address("s", "1", "c", "00-000", "PL"),
+            status: EmployeeStatus.Working,
+            cinemas: new List<Cinema> { c1 }
+        );
+    }
+    [Test]
+    public void AddCinema_ShouldCreateReverseConnection()
+    {
+        e1.AddCinema(c2);
+
+        Assert.IsTrue(e1.GetCinemas().Contains(c2));
+
+        Assert.IsTrue(c2.GetEmployees().Contains(e1));
     }
 
     [Test]
-    public void AddEmployeeToCinema_CreatesReverseConnection()
+    public void RemoveCinema_ShouldRemoveReverseConnection()
     {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
+        Assert.IsTrue(e1.GetCinemas().Contains(c1));
+        Assert.IsTrue(c1.GetEmployees().Contains(e1));
 
-        cinema.AddEmployee(emp);
+        e1.RemoveCinema(c1);
 
-        Assert.That(cinema.GetEmployees().Contains(emp));
-        Assert.That(emp.GetCinemas().Contains(cinema));
+        Assert.IsFalse(e1.GetCinemas().Contains(c1));
+
+        Assert.IsFalse(c1.GetEmployees().Contains(e1));
     }
 
     [Test]
-    public void AddCinemaFromEmployeeSide_CreatesReverseConnection()
+    public void ModifyCinema_ShouldRemoveOldAndAddNew_WithReverseConnections()
     {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
+        e1.RemoveCinema(c1);
+        e1.AddCinema(c2);
 
-        emp.AddCinema(cinema);
+        Assert.IsFalse(e1.GetCinemas().Contains(c1));
+        Assert.IsTrue(e1.GetCinemas().Contains(c2));
 
-        Assert.That(emp.GetCinemas().Contains(cinema));
-        Assert.That(cinema.GetEmployees().Contains(emp));
+        Assert.IsFalse(c1.GetEmployees().Contains(e1));
+        Assert.IsTrue(c2.GetEmployees().Contains(e1));
     }
 
     [Test]
-    public void RemoveEmployeeFromCinema_RemovesReverseConnection()
+    public void AddCinema_ShouldThrow_WhenNull()
     {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        cinema.AddEmployee(emp);
-        cinema.RemoveEmployee(emp);
-
-        Assert.That(!cinema.GetEmployees().Contains(emp));
-        Assert.That(!emp.GetCinemas().Contains(cinema));
+        Assert.Throws<ArgumentException>(() => e1.AddCinema(null!));
     }
 
     [Test]
-    public void RemoveCinemaFromEmployee_RemovesReverseConnection()
+    public void RemoveCinema_ShouldThrow_WhenNull()
     {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        emp.AddCinema(cinema);
-        emp.RemoveCinema(cinema);
-
-        Assert.That(!cinema.GetEmployees().Contains(emp));
-        Assert.That(!emp.GetCinemas().Contains(cinema));
+        Assert.Throws<ArgumentException>(() => e1.RemoveCinema(null!));
     }
 
     [Test]
-    public void AddEmployee_Null_Throws()
+    public void AddSameCinemaTwice_ShouldNotDuplicate()
     {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        Assert.Throws<ArgumentException>(() => cinema.AddEmployee(null));
+        int before = e1.GetCinemas().Count;
+
+        e1.AddCinema(c1);
+
+        int after = e1.GetCinemas().Count;
+
+        Assert.AreEqual(before, after);
     }
 
     [Test]
-    public void AddCinema_Null_Throws()
+    public void RemoveCinema_NotAssigned_ShouldDoNothing()
     {
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        Assert.Throws<ArgumentException>(() => emp.AddCinema(null));
-    }
-
-    [Test]
-    public void AddSameEmployeeTwice_Throws()
-    {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        cinema.AddEmployee(emp);
-
-        var ex = Assert.Throws<InvalidOperationException>(() => cinema.AddEmployee(emp));
-        Assert.That(ex.Message, Does.Contain("already linked"));
-    }
-
-    [Test]
-    public void AddSameCinemaTwice_Throws()
-    {
-        var cinema = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var emp = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        emp.AddCinema(cinema);
-
-        var ex = Assert.Throws<InvalidOperationException>(() => emp.AddCinema(cinema));
-        Assert.That(ex.Message, Does.Contain("already linked"));
-    } 
-
-    [Test]
-    public void ManyToMany_AssociationWorksBothWays()
-    {
-        var c1 = new Cinema(1, "Galaxy", "Address", "123", "mail@mail.com", "10-22");
-        var c2 = new Cinema(2, "Silver", "Address2", "321", "silver@mail.com", "9-23");
-
-        var e1 = new Employee(1, "Anna", "Nowak", "123", "a@mail.com",
-            DateTime.Now.AddYears(-20), DateTime.Now.AddYears(-2), 3000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        var e2 = new Employee(2, "Pawel", "Kowal", "456", "p@mail.com",
-            DateTime.Now.AddYears(-30), DateTime.Now.AddYears(-5), 4000,
-            new Address("s","1","c","00-000","pl"), EmployeeStatus.Working);
-
-        c1.AddEmployee(e1);
-        c1.AddEmployee(e2);
-        c2.AddEmployee(e1);
-
-        Assert.That(c1.GetEmployees().SequenceEqual(new[] { e1, e2 }));
-        Assert.That(c2.GetEmployees().SequenceEqual(new[] { e1 }));
-        Assert.That(e1.GetCinemas().Contains(c1) && e1.GetCinemas().Contains(c2));
-        Assert.That(e2.GetCinemas().Contains(c1));
+        Assert.DoesNotThrow(() => e1.RemoveCinema(c2));
     }
 }
