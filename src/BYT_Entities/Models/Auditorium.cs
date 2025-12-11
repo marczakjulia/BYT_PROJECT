@@ -13,18 +13,43 @@ public class Auditorium
     private HashSet<Seat> _seats = new();
     private AuditoriumSoundsSystem _soundSystem;
     private Cinema _cinema;
-    [XmlIgnore]
     public Cinema Cinema { get; set; }
 
-    internal void SetCinemaInternal(Cinema cinema)
+    public void AddCinema(Cinema cinema)
     {
-        _cinema = cinema;
+        if (cinema == null)
+            throw new ArgumentException("Cinema cannot be null.");
+
+        if (this.Cinema == cinema)
+            return;
+
+        if (this.Cinema != null && this.Cinema != cinema)
+            throw new InvalidOperationException("Auditorium already belongs to another cinema.");
+
+        this.Cinema = cinema;
+
+        cinema.AddAuditorium(this);
     }
-    internal void RemoveCinemaInternal(Cinema cinema)
+    //needed for compisition
+    public static void RemoveFromGlobalList(Auditorium auditorium)
     {
-        if (_cinema == cinema)
-            _cinema = null;
+        if (auditorium == null) throw new ArgumentException("Auditorium cannot be null.");
+        _auditorium.Remove(auditorium);
     }
+
+    public void RemoveCinema(Cinema cinema)
+    {
+        if (cinema == null)
+            throw new ArgumentException("Cinema cannot be null.");
+
+        if (this.Cinema != cinema)
+            return;
+
+        this.Cinema = null;
+
+        cinema.RemoveAuditorium(this);
+    }
+
 
     public Auditorium()
     {

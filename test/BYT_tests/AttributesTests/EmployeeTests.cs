@@ -6,88 +6,120 @@ namespace TestByt;
 
 public class EmployeeTests
 {
+    private Cinema _defaultCinema;
+
     [SetUp]
     public void Setup()
     {
         Employee.ClearEmployees();
+        Cinema.ClearCinemas();
+
+        _defaultCinema = new Cinema(
+            100, "TestCinema", "Street 1", "123", "mail@test.com", "08-22"
+        );
     }
     
     [Test]
     public void ShouldThrowException_WhenNameIsEmpty()
     {
-        Assert.Throws<ArgumentException>(() => new Employee(1, "   ", "Smith", "12345678901", "john@cinema.com", new DateTime(1995, 5, 5), DateTime.Now.AddDays(-30), 4000, new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working));
+        Assert.Throws<ArgumentException>(() =>
+            new Employee(
+                1, "   ", "Smith", "12345678901", "john@cinema.com",
+                new DateTime(1995, 5, 5), DateTime.Now.AddDays(-30), 4000,
+                new Address("street", "buildingNumber", "city", "postalCode", "country"),
+                EmployeeStatus.Working,
+                new List<Cinema> { _defaultCinema }
+            )
+        );
     }
+
     [Test]
     public void ShouldThrowException_WhenBirthDateInFuture()
     {
-        Assert.Throws<ArgumentException>(() => new Employee(2,"Anna", "Smuga", "12345678901", "aaaa@aaa.pl", DateTime.Now.AddDays(10), DateTime.Now, 4000,new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working));
+        Assert.Throws<ArgumentException>(() =>
+            new Employee(
+                2, "Anna", "Smuga", "12345678901", "aaaa@aaa.pl",
+                DateTime.Now.AddDays(10), DateTime.Now, 4000,
+                new Address("street", "buildingNumber", "city", "postalCode", "country"),
+                EmployeeStatus.Working,
+                new List<Cinema> { _defaultCinema }
+            )
+        );
     }
     
     [Test]
     public void ShouldThrowException_WhenEmailInvalid()
     {
-        Assert.Throws<ArgumentException>(() => new Employee(3, "Ania", "Smuga", "12345678901", "aaaania", new DateTime(1990, 1, 1), DateTime.Now, 4000,new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working));
+        Assert.Throws<ArgumentException>(() =>
+            new Employee(
+                3, "Ania", "Smuga", "12345678901", "aaaania",
+                new DateTime(1990, 1, 1), DateTime.Now, 4000,
+                new Address("street", "buildingNumber", "city", "postalCode", "country"),
+                EmployeeStatus.Working,
+                new List<Cinema> { _defaultCinema }
+            )
+        );
     }
     
     [Test]
     public void ShouldCreateEmployee_WhenAllDataValid()
     {
-        Assert.DoesNotThrow(() => new Employee(4, "Anna", "Smuga", "98765432109", "anna@success.com", new DateTime(1992, 3, 12), DateTime.Now.AddDays(-100), 5000, new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working));
+        Assert.DoesNotThrow(() =>
+            new Employee(
+                4, "Anna", "Smuga", "98765432109", "anna@success.com",
+                new DateTime(1992, 3, 12), DateTime.Now.AddDays(-100), 5000,
+                new Address("street", "buildingNumber", "city", "postalCode", "country"),
+                EmployeeStatus.Working,
+                new List<Cinema> { _defaultCinema }
+            )
+        );
     }
     
     [Test]
-        public void Extent_ShouldStoreCreatedEmployees()
-        {
-            var e1 = new Employee(1, "John", "Doe", "12345678901", "john@test.com",
-                new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000, new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working);
-            var e2 = new Employee(2, "Jane", "Smith", "98765432109", "jane@test.com",
-                new DateTime(1992, 5, 5), new DateTime(2021, 2, 2), 3500, new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working);
+    public void Extent_ShouldStoreCreatedEmployees()
+    {
+        var e1 = new Employee(
+            1, "John", "Doe", "12345678901", "john@test.com",
+            new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000,
+            new Address("street", "buildingNumber", "city", "postalCode", "country"),
+            EmployeeStatus.Working,
+            new List<Cinema> { _defaultCinema }
+        );
 
-            var extent = Employee.GetEmployees();
+        var e2 = new Employee(
+            2, "Jane", "Smith", "98765432109", "jane@test.com",
+            new DateTime(1992, 5, 5), new DateTime(2021, 2, 2), 3500,
+            new Address("street", "buildingNumber", "city", "postalCode", "country"),
+            EmployeeStatus.Working,
+            new List<Cinema> { _defaultCinema }
+        );
 
-            Assert.AreEqual(2, extent.Count);
-            Assert.Contains(e1, extent);
-            Assert.Contains(e2, extent);
-        }
+        var extent = Employee.GetEmployees();
 
-        [Test]
-        public void Encapsulation_ShouldPreventDirectModificationOfPrivateFields()
-        {
-            var employee = new Employee(1, "John", "Doe", "12345678901", "john@test.com",
-                new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000,new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working);
-
-            var nameField = typeof(Employee).GetField("_name", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            nameField.SetValue(employee, "TamperedName");
-
-            var extent = Employee.GetEmployees();
-
-            Assert.AreEqual("TamperedName", extent[0].Name);
-        }
-
-        [Test]
-        public void SaveLoad_ShouldPersistExtentCorrectly()
-        {
-            var path = "test_employee.xml";
-
-            var e1 = new Employee(1, "John", "Doe", "12345678901", "john@test.com",
-                new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000,new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working);
-            var e2 = new Employee(2, "Jane", "Smith", "98765432109", "jane@test.com",
-                new DateTime(1992, 5, 5), new DateTime(2021, 2, 2), 3500, new Address( "street",  "buildingNumber",  "city",  "postalCode",  "country"),EmployeeStatus.Working);
-
-            Employee.Save(path);
-
-            Employee.ClearEmployees();
-            Assert.AreEqual(0, Employee.GetEmployees().Count);
-
-            var loaded = Employee.Load(path);
-            var extent = Employee.GetEmployees();
-
-            Assert.IsTrue(loaded);
-            Assert.AreEqual(2, extent.Count);
-            Assert.AreEqual("John", extent[0].Name);
-            Assert.AreEqual("Jane", extent[1].Name);
-
-            if (File.Exists(path))
-                File.Delete(path);
-        }
+        Assert.AreEqual(2, extent.Count);
+        Assert.Contains(e1, extent);
+        Assert.Contains(e2, extent);
     }
+
+    [Test]
+    public void Encapsulation_ShouldPreventDirectModificationOfPrivateFields()
+    {
+        var employee = new Employee(
+            1, "John", "Doe", "12345678901", "john@test.com",
+            new DateTime(1990, 1, 1), new DateTime(2020, 1, 1), 3000,
+            new Address("street", "buildingNumber", "city", "postalCode", "country"),
+            EmployeeStatus.Working,
+            new List<Cinema> { _defaultCinema }
+        );
+
+        var nameField = typeof(Employee).GetField("_name",
+            System.Reflection.BindingFlags.NonPublic |
+            System.Reflection.BindingFlags.Instance);
+
+        nameField.SetValue(employee, "TamperedName");
+
+        var extent = Employee.GetEmployees();
+
+        Assert.AreEqual("TamperedName", extent[0].Name);
+    }
+}

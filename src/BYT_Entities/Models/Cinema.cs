@@ -13,9 +13,9 @@ public class Cinema
     private string _email;
     private string _openingHours;
     private static List<Cinema> cinemasList = new List<Cinema>();
-    [XmlIgnore]
+    
     private HashSet<Employee> _employees = new HashSet<Employee>();
-    [XmlIgnore]
+  
     private HashSet<Auditorium> _auditoriums = new HashSet<Auditorium>();
 
     public static List<Cinema> GetCinemas()
@@ -101,11 +101,11 @@ public class Cinema
             throw new ArgumentException("Employee cannot be null.");
 
         if (_employees.Contains(employee))
-            throw new InvalidOperationException("This employee is already linked to this cinema.");
+            return; //stop logic
 
         _employees.Add(employee);
 
-        employee.AddCinemaInternal(this);
+        employee.AddCinema(this);
     }
 
     public void RemoveEmployee(Employee employee)
@@ -114,26 +114,16 @@ public class Cinema
             throw new ArgumentException("Employee cannot be null.");
 
         if (!_employees.Contains(employee))
-            throw new InvalidOperationException("This employee is not linked to this cinema.");
+            return;
 
         _employees.Remove(employee);
 
-        employee.RemoveCinemaInternal(this);
-    }
-
-    internal void AddEmployeeInternal(Employee employee)
-    {
-        _employees.Add(employee);
-    }
-
-    internal void RemoveEmployeeInternal(Employee employee)
-    {
-        _employees.Remove(employee);
+        employee.RemoveCinema(this);
     }
     
     public HashSet<Auditorium> GetAuditoriums()
     {
-        return new HashSet<Auditorium>(_auditoriums); // slide rule: return copy
+        return new HashSet<Auditorium>(_auditoriums);
     }
     
     public void AddAuditorium(Auditorium auditorium)
@@ -142,14 +132,11 @@ public class Cinema
             throw new ArgumentException("Auditorium cannot be null.");
 
         if (_auditoriums.Contains(auditorium))
-            throw new InvalidOperationException("This auditorium already belongs to the cinema.");
-
-        if (auditorium.Cinema != null)
-            throw new InvalidOperationException("This auditorium already belongs to another cinema.");
+            return;//stop logic
 
         _auditoriums.Add(auditorium);
 
-        auditorium.SetCinemaInternal(this);
+        auditorium.AddCinema(this);
     }
     public void RemoveAuditorium(Auditorium auditorium)
     {
@@ -157,19 +144,39 @@ public class Cinema
             throw new ArgumentException("Auditorium cannot be null.");
 
         if (!_auditoriums.Contains(auditorium))
-            throw new InvalidOperationException("Auditorium does not belong to this cinema.");
+            return;
 
         _auditoriums.Remove(auditorium);
 
-        auditorium.RemoveCinemaInternal(this);
+        auditorium.RemoveCinema(this);
     }
+//because composition
     public void Destroy()
     {
-        foreach (var a in _auditoriums.ToList())
-            RemoveAuditorium(a);
+        // 1) Remove auditoriums from global list AND unlink reverse references
+        foreach (var aud in _auditoriums.ToList())
+        {
+            // remove from the static global list of auditoriums
+            Auditorium.RemoveFromGlobalList(aud);
 
+            // unlink reverse reference (this will not re-add to cinema because of STOP logic)
+            aud.RemoveCinema(this);
+        }
+
+        _auditoriums.Clear();
+
+        // 2) Remove employees' references to this cinema
+        foreach (var emp in _employees.ToList())
+        {
+            emp.RemoveCinema(this);
+        }
+        _employees.Clear();
+
+        // 3) remove the cinema from the global cinemas list
         cinemasList.Remove(this);
     }
+
+
     
     public List<Employee> Employees
     {
@@ -200,13 +207,6 @@ public class Cinema
     
     public static void Save(string path = "cinema.xml")
     {
-        foreach (var cinema in cinemasList)
-        {
-            if (cinema._auditoriums.Count < 1)
-            {
-                //throw new InvalidOperationException($"Cinema '{cinema.Name}' must contain at least one auditorium before saving.");
-            }
-        }
         StreamWriter file = File.CreateText(path);
         XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<Cinema>));
         using (XmlTextWriter writer = new XmlTextWriter(file))
@@ -214,23 +214,6 @@ public class Cinema
             xmlSerializer.Serialize(writer, cinemasList);
         }
 
-    }
-    public void RestoreRelations()
-    {
-        _employees.Clear();
-        _auditoriums.Clear();
-
-        foreach (var emp in Employees)
-        {
-            _employees.Add(emp);
-            emp.AddCinemaInternal(this);
-        }
-
-        foreach (var aud in Auditoriums)
-        {
-            _auditoriums.Add(aud);
-            aud.SetCinemaInternal(this);
-        }
     }
 
     public static bool Load(string path = "cinema.xml")

@@ -18,7 +18,6 @@ public class Employee
     private DateTime _hireDate;
     private Address _address;
     private static List<Employee> employeesList = new List<Employee>();
-    [XmlIgnore]
     private HashSet<Cinema> _cinemas = new HashSet<Cinema>();
 
     
@@ -155,11 +154,11 @@ public class Employee
             throw new ArgumentException("Cinema cannot be null.");
 
         if (_cinemas.Contains(cinema))
-            throw new InvalidOperationException("This cinema is already linked to this employee.");
+            return; //stop logic
 
         _cinemas.Add(cinema);
 
-        cinema.AddEmployeeInternal(this);
+        cinema.AddEmployee(this);
     }
 
     public void RemoveCinema(Cinema cinema)
@@ -168,32 +167,29 @@ public class Employee
             throw new ArgumentException("Cinema cannot be null.");
 
         if (!_cinemas.Contains(cinema))
-            throw new InvalidOperationException("This cinema is not linked to this employee.");
+            return;
 
         _cinemas.Remove(cinema);
 
-        cinema.RemoveEmployeeInternal(this);
+        cinema.RemoveEmployee(this);
     }
-
-    internal void AddCinemaInternal(Cinema cinema)
-    {
-        _cinemas.Add(cinema);
-    }
-
-    internal void RemoveCinemaInternal(Cinema cinema)
-    {
-        _cinemas.Remove(cinema);
-    }
-    [XmlIgnore]
+    
     public List<Cinema> Cinemas
     {
         get => _cinemas.ToList();
         set => _cinemas = value != null ? new HashSet<Cinema>(value) : new();
     }
 
-    public Employee(int id, string name, string surname, string pesel, string email,
-        DateTime dayOfBirth, DateTime hireDate, double salary, Address address, EmployeeStatus status)
+    public Employee(
+        int id, string name, string surname, string pesel, string email,
+        DateTime dayOfBirth, DateTime hireDate, double salary,
+        Address address, EmployeeStatus status,
+        IEnumerable<Cinema> cinemas
+    )
     {
+        if (cinemas == null || !cinemas.Any())
+            throw new ArgumentException("Employee must be assigned to at least one cinema.");
+
         Id = id;
         Name = name;
         Surname = surname;
@@ -204,8 +200,13 @@ public class Employee
         Salary = salary;
         Status = status;
         Address = address;
+
         AddEmployee(this);
+
+        foreach (var c in cinemas)
+            AddCinema(c);
     }
+
     public Employee() { }
     public static void Save(string path = "employee.xml")
     {
@@ -214,16 +215,6 @@ public class Employee
         using (XmlTextWriter writer = new XmlTextWriter(file))
         {
             xmlSerializer.Serialize(writer, employeesList);
-        }
-    }
-    public void RestoreRelations()
-    {
-        _cinemas.Clear();
-
-        foreach (var cinema in Cinemas)
-        {
-            _cinemas.Add(cinema);
-            cinema.AddEmployeeInternal(this);
         }
     }
 

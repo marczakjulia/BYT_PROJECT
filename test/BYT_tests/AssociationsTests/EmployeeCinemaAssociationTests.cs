@@ -114,7 +114,7 @@ public class EmployeeCinemaAssociationTests
 
         var ex = Assert.Throws<InvalidOperationException>(() => emp.AddCinema(cinema));
         Assert.That(ex.Message, Does.Contain("already linked"));
-    }
+    } 
 
     [Test]
     public void ManyToMany_AssociationWorksBothWays()

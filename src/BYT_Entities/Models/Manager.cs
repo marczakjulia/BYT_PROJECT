@@ -217,19 +217,6 @@ public class Manager
             try
             {
                 managersList = (List<Manager>)xmlSerializer.Deserialize(reader);
-                //restore relationship because they would be lost with xml file
-                foreach (var manager in managersList)
-                {
-                    if (manager._supervisor != null)
-                    {
-                        manager._supervisor.AddSubordinateInternal(manager);
-                    }
-
-                    foreach (var subordinate in manager._subordinates)
-                    {
-                        subordinate.SetSupervisorInternal(manager);
-                    }
-                }
             }
             catch
             {
