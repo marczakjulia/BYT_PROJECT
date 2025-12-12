@@ -153,26 +153,21 @@ public class Cinema
 //because composition
     public void Destroy()
     {
-        // 1) Remove auditoriums from global list AND unlink reverse references
         foreach (var aud in _auditoriums.ToList())
         {
-            // remove from the static global list of auditoriums
             Auditorium.RemoveFromGlobalList(aud);
 
-            // unlink reverse reference (this will not re-add to cinema because of STOP logic)
             aud.RemoveCinema(this);
         }
 
         _auditoriums.Clear();
 
-        // 2) Remove employees' references to this cinema
         foreach (var emp in _employees.ToList())
         {
             emp.RemoveCinema(this);
         }
         _employees.Clear();
 
-        // 3) remove the cinema from the global cinemas list
         cinemasList.Remove(this);
     }
 
