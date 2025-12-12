@@ -13,7 +13,13 @@ public class Auditorium
     private HashSet<Seat> _seats = new();
     private AuditoriumSoundsSystem _soundSystem;
     private Cinema _cinema;
-    public Cinema Cinema { get; set; }
+
+    public Cinema Cinema
+    {
+        get => _cinema;
+        private set => _cinema = value;
+    }
+
     
     [XmlIgnore]
     private HashSet<Screening> _screenings = new();
@@ -27,23 +33,23 @@ public class Auditorium
         if (cinema == null)
             throw new ArgumentException("Cinema cannot be null.");
 
-        if (this.Cinema == cinema)
+        if (_cinema == cinema)
             return;
 
-        if (this.Cinema != null && this.Cinema != cinema)
+        if (_cinema != null && _cinema != cinema)
             throw new InvalidOperationException("Auditorium already belongs to another cinema.");
 
-        this.Cinema = cinema;
+        _cinema = cinema;
 
         cinema.AddAuditorium(this);
     }
+
     
     public static List<Auditorium> GetAll()
     {
         return new List<Auditorium>(_auditorium);
     }
 
-    //needed for compisition
     public static void RemoveFromGlobalList(Auditorium auditorium)
     {
         if (auditorium == null) throw new ArgumentException("Auditorium cannot be null.");
@@ -55,14 +61,13 @@ public class Auditorium
         if (cinema == null)
             throw new ArgumentException("Cinema cannot be null.");
 
-        if (this.Cinema != cinema)
+        if (_cinema != cinema)
             return;
 
-        this.Cinema = null;
+        _cinema = null;
 
         cinema.RemoveAuditorium(this);
     }
-
 
     public Auditorium()
     {
