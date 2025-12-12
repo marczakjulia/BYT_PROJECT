@@ -170,21 +170,6 @@ public class Cinema
 
         cinemasList.Remove(this);
     }
-
-
-    
-    public List<Employee> Employees
-    {
-        get => _employees.ToList();
-        set => _employees = value != null ? new HashSet<Employee>(value) : new HashSet<Employee>();
-    }
-
-    public List<Auditorium> Auditoriums
-    {
-        get => _auditoriums.ToList();
-        set => _auditoriums = value != null ? new HashSet<Auditorium>(value) : new HashSet<Auditorium>();
-    }
-
     
     public Cinema(int id, string name, string address, string phone, string email, string openingHours)
     {

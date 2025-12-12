@@ -142,7 +142,6 @@ public class Employee
         }
     }
     
-    
     public HashSet<Cinema> GetCinemas()
     {
         return new HashSet<Cinema>(_cinemas);
@@ -172,12 +171,6 @@ public class Employee
         _cinemas.Remove(cinema);
 
         cinema.RemoveEmployee(this);
-    }
-    
-    public List<Cinema> Cinemas
-    {
-        get => _cinemas.ToList();
-        set => _cinemas = value != null ? new HashSet<Cinema>(value) : new();
     }
 
     public Employee(
