@@ -9,11 +9,13 @@ public class ScreeningTicketQualifiedAssociationTests
     private Screening _screening;
     private Seat _seat1;
     private Seat _seat2;
+    private Cinema c1;
 
     [SetUp]
     public void Setup()
     {
-        _auditorium = new Auditorium("Aud1", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2);
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+        _auditorium = new Auditorium("Aud1", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2,c1);
         _seat1 = new Seat("01A", SeatType.Normal, 1);
         _seat2 = new Seat("01B", SeatType.VIP, 2);
 

@@ -5,16 +5,19 @@ namespace TestByt;
 
 public class BagTests
 {
+    private Cinema c1;
     [SetUp]
     public void Setup()
     {
         Movie.ClearMovies();
         Auditorium.ClearAuditorium();
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+
 
         var newRelease = new NewRelease(1, false, DateTime.Now.AddDays(7), "Pixar");
         _movie = new Movie(1, "X", "TR", 100, "animation", "Mazhar", AgeRestrictionType.PG13, newRelease);
 
-        _auditorium = new Auditorium("Hall 1", AuditoriumScreenType._4DX, AuditoriumSoundsSystem.DolbyAtmos, 1);
+        _auditorium = new Auditorium("Hall 1", AuditoriumScreenType._4DX, AuditoriumSoundsSystem.DolbyAtmos, 1,c1);
 
         for (var i = 0; i < 12; i++)
         {
@@ -47,7 +50,7 @@ public class BagTests
     [Test]
     public void SetAuditoriumShouldUpdateConnectionsProperly()
     {
-        var auditorium2 = new Auditorium("Hall 2", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2);
+        var auditorium2 = new Auditorium("Hall 2", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2,c1);
         for (var i = 0; i < 12; i++)
         {
             var seat = new Seat($"{i:D2}A", SeatType.Normal, i);

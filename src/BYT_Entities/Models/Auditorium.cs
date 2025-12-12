@@ -42,9 +42,8 @@ public class Auditorium
         _cinema = cinema;
 
         cinema.AddAuditorium(this);
+        
     }
-
-    
     public static List<Auditorium> GetAll()
     {
         return new List<Auditorium>(_auditorium);
@@ -75,13 +74,14 @@ public class Auditorium
     }
 
     public Auditorium(string name, AuditoriumScreenType auditoriumScreenType,
-        AuditoriumSoundsSystem soundSystem, int id)
+        AuditoriumSoundsSystem soundSystem, int id, Cinema cinema)
     {
         Name = name;
         AuditoriumScreenType = auditoriumScreenType;
         SoundSystem = soundSystem;
         Id = id;
         _seats = new HashSet<Seat>();
+        AddCinema(cinema);
 
         AddAuditorium(this);
     }

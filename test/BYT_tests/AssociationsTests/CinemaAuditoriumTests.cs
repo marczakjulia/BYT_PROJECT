@@ -18,7 +18,7 @@ public class CinemaAuditoriumTests
         c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
         c2 = new Cinema(2, "C2", "B", "2", "b@b.com", "10-20");
 
-        a1 = new Auditorium("Hall A", AuditoriumScreenType._2D, AuditoriumSoundsSystem.DolbyAtmos, id: 10);
+        a1 = new Auditorium("Hall A", AuditoriumScreenType._2D, AuditoriumSoundsSystem.DolbyAtmos, id: 10,c1);
     }
 
     [Test]

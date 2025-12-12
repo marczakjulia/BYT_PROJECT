@@ -4,11 +4,13 @@ using BYT_Entities.Models;
 public class SeatTests
 {
     private Auditorium _auditorium;
+    private Cinema c1;
 
     [SetUp]
     public void Setup()
     {
-        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1);
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1,c1);
 
         if (_auditorium.Seats.Any())
         {
@@ -85,7 +87,7 @@ public class SeatTests
     {
         var seat = new Seat("05A", SeatType.Normal, 1);
         var anotherAuditorium =
-            new Auditorium("Salon 2", AuditoriumScreenType._3D, AuditoriumSoundsSystem.DolbyAtmos, 2);
+            new Auditorium("Salon 2", AuditoriumScreenType._3D, AuditoriumSoundsSystem.DolbyAtmos, 2,c1);
 
         seat.SetAuditorium(_auditorium);
 

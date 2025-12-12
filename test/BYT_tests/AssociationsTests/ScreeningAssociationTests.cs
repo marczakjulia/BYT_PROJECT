@@ -6,13 +6,15 @@ public class ScreeningAssociationTests
 {
     private Movie _movie;
     private Auditorium _auditorium;
+    private Cinema c1;
 
     [SetUp]
     public void Setup()
     {
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
         Movie.ClearMovies();
         _movie = new Movie(1, "Test", "PL", 120, "Desc", "Dir",null, new Rerelease(1,"reas",new DateTime(2006,10,6),true));
-        _auditorium = new Auditorium("A1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1);
+        _auditorium = new Auditorium("A1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1,c1);
     }
 
     [Test]
@@ -96,7 +98,7 @@ public class ScreeningAssociationTests
     [Test]
     public void SetAuditorium_ShouldSwitchAuditoriumProperly()
     {
-        var aud2 = new Auditorium("A2", AuditoriumScreenType._3D, AuditoriumSoundsSystem.DolbyAtmos, 2);
+        var aud2 = new Auditorium("A2", AuditoriumScreenType._3D, AuditoriumSoundsSystem.DolbyAtmos, 2,c1);
 
         var screening = new Screening(
             10,

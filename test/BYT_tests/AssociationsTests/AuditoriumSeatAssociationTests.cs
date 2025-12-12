@@ -6,11 +6,13 @@ namespace TestByt;
 public class AuditoriumSeatAssociationTests
 {
     private Auditorium _auditorium;
-
+    private Cinema c1;
+    
     [SetUp]
     public void SetUp()
     {
-        _auditorium = new Auditorium("Main Hall", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.Stereo, 1);
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+        _auditorium = new Auditorium("Main Hall", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.Stereo, 1,c1);
         for (var i = 0; i < 12; i++)
         {
             var seat = new Seat($"{i:D2}A", SeatType.Normal, i);
@@ -35,7 +37,7 @@ public class AuditoriumSeatAssociationTests
         seat.SetAuditorium(_auditorium);
 
         var anotherAuditorium =
-            new Auditorium("Second Hall", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2);
+            new Auditorium("Second Hall", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 2,c1);
 
         Assert.Throws<InvalidOperationException>(() => seat.SetAuditorium(anotherAuditorium));
     }

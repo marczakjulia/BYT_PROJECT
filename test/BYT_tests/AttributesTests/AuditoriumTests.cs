@@ -7,15 +7,18 @@ public class AuditoriumTests
 {
     private Auditorium _auditorium;
     private Movie _movie;
+    private Cinema c1;
 
     [SetUp]
     public void Setup()
     {
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+
         _auditorium = new Auditorium(
             "Salon 1",
             AuditoriumScreenType._2D,
             AuditoriumSoundsSystem.Stereo,
-            1
+            1,c1
         );
 
         for (var i = 0; i < 15; i++)
@@ -55,7 +58,7 @@ public class AuditoriumTests
         Assert.DoesNotThrow(() =>
         {
             var minimalAuditorium = new Auditorium("Mini Salon", AuditoriumScreenType._2D,
-                AuditoriumSoundsSystem.Stereo, 2);
+                AuditoriumSoundsSystem.Stereo, 2,c1);
             Assert.That(minimalAuditorium.Seats.Count, Is.EqualTo(0));
         });
     }

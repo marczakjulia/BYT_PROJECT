@@ -7,11 +7,13 @@ public class ScreeningTests
 {
     private Auditorium _auditorium;
     private Movie _movie;
+    private Cinema c1;
 
     [SetUp]
     public void Setup()
     {
-        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1);
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+        _auditorium = new Auditorium("Salon 1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1,c1);
 
         if (_auditorium.Seats.Any())
         {
@@ -64,7 +66,7 @@ public class ScreeningTests
     [Test]
     public void AuditoriumHasLessThan12Seats()
     {
-        var tempAuditorium = new Auditorium("Temp", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 1);
+        var tempAuditorium = new Auditorium("Temp", AuditoriumScreenType.IMAX, AuditoriumSoundsSystem.DolbyAtmos, 1,c1);
 
         for (var i = 0; i < 10; i++)
         {
@@ -72,7 +74,7 @@ public class ScreeningTests
             tempAuditorium.SetSeat(seat);
         }
         
-        Assert.DoesNotThrow(() => new Auditorium("Mini Salon", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 2)); 
+        Assert.DoesNotThrow(() => new Auditorium("Mini Salon", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 2,c1)); 
     }
 
     [Test]
