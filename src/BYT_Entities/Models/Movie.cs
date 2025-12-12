@@ -24,7 +24,7 @@ public class Movie
     private HashSet<Screening> _screenings = new();
 
     [XmlIgnore]
-    public HashSet<Screening> Screenings => new(_screenings);
+    public IReadOnlyCollection<Screening> Screenings => _screenings;
     
     [XmlIgnore]
     public NewRelease? NewRelease { get; private set; }
@@ -195,34 +195,7 @@ public class Movie
             review.RemoveMovie();
     }
     
-    public void AddScreening(Screening screening)
-    {
-        if (screening == null)
-            throw new ArgumentException("Screening cannot be null.");
-
-        if (_screenings.Contains(screening))
-            return;
-
-        _screenings.Add(screening);
-
-        if (screening.Movie != this)
-            screening.SetMovie(this);
-    }
-
-
-    public void RemoveScreening(Screening screening)
-    {
-        if (screening == null)
-            throw new ArgumentException("Screening cannot be null.");
-
-        if (!_screenings.Contains(screening))
-            return;
-
-        _screenings.Remove(screening);
-
-        if (screening.Movie == this)
-            screening.RemoveMovie();
-    }
+    
 
     
     public void SetNewRelease(NewRelease newRelease)
@@ -341,6 +314,16 @@ public class Movie
         if (newNewRelease.Movie != this)
             newNewRelease.SetMovie(this);
     }
+    internal void AddScreeningInternal(Screening screening)
+    {
+        _screenings.Add(screening);
+    }
+
+    internal void RemoveScreeningInternal(Screening screening)
+    {
+        _screenings.Remove(screening);
+    }
+
 
 
     /*

@@ -32,24 +32,8 @@ public class ScreeningAssociationTests
         Assert.That(screening.Movie, Is.EqualTo(_movie));
         Assert.That(screening.Auditorium, Is.EqualTo(_auditorium));
     }
-    
-    [Test]
-    public void AddScreeningTwice_ShouldNotDuplicate()
-    {
-        var screening = new Screening(
-            10,
-            _movie,
-            _auditorium,
-            DateTime.Now.AddDays(2),
-            TimeSpan.FromHours(18),
-            ScreeningFormat._2D,
-            ScreeningVersion.Original);
 
-        _movie.AddScreening(screening);
-        _movie.AddScreening(screening);
 
-        Assert.That(_movie.Screenings.Count, Is.EqualTo(1));
-    }
     
     [Test]
     public void RemoveScreening_ShouldRemoveFromBothSides()
