@@ -22,7 +22,7 @@ public class ScreeningTicketQualifiedAssociationTests
         _seat1.SetAuditorium(_auditorium);
         _seat2.SetAuditorium(_auditorium);
 
-        var movie = new Movie(1, "Inception", "USA", 100, "Sci-Fi", "Nolan",null, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Inception", "USA", 100, "Sci-Fi", "Nolan",null,  new NormalCut(),new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
         _screening = new Screening(1, movie, _auditorium, DateTime.Now.AddDays(1), TimeSpan.FromHours(18),
             ScreeningFormat._2D, ScreeningVersion.Original);
 

@@ -1,4 +1,5 @@
 using BYT_Entities.Enums;
+using BYT_Entities.Interfaces;
 using BYT_Entities.Models;
 
 namespace TestByt;
@@ -15,7 +16,7 @@ public class BagTests
 
 
         var newRelease = new NewRelease(1, false, DateTime.Now.AddDays(7), "Pixar");
-        _movie = new Movie(1, "X", "TR", 100, "animation", "Mazhar", AgeRestrictionType.PG13, newRelease);
+        _movie = new Movie(1, "X", "TR", 100, "animation", "Mazhar", AgeRestrictionType.PG13, new NormalCut(), newRelease);
 
         _auditorium = new Auditorium("Hall 1", AuditoriumScreenType._4DX, AuditoriumSoundsSystem.DolbyAtmos, 1,c1);
 

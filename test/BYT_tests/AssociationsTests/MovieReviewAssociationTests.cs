@@ -12,7 +12,7 @@ public class MovieReviewAssociationTests
     public void Setup()
     {
         Movie.ClearMovies();
-        _movie = new Movie(1, "TestMovie", "USA", 120, "desc", "dir", null,
+        _movie = new Movie(1, "TestMovie", "USA", 120, "desc", "dir", null, new NormalCut(),
             new Rerelease(1, "rr", DateTime.Now, true));
     }
     [Test]
@@ -44,7 +44,7 @@ public class MovieReviewAssociationTests
     [Test]
     public void SetMovie_ShouldSwitchMovieProperly()
     {
-        var movie2 = new Movie(2, "Other", "UK", 90, "d", "x", null,
+        var movie2 = new Movie(2, "Other", "UK", 90, "d", "x", null, new NormalCut(),
             new Rerelease(2, "r", DateTime.Now, false));
 
         var review = new ReviewPage("A", "B", 8, 1, _movie);

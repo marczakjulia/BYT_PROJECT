@@ -13,7 +13,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void AddReviewCreatesReverseConnection()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var ticket = new Ticket(19.99m, 1);
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
 
@@ -26,7 +26,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void AddReviewFromReviewSideCreatesReverseConnection()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
         var ticket = new Ticket(19.99m, 1);
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1,movie, "Super actings!");
 
@@ -39,7 +39,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void RemoveReviewRemovesReverseConnection()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
         var ticket = new Ticket(19.99m, 1);
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         ticket.AddReview(review);
@@ -53,7 +53,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void RemoveReviewFromReviewSideRemovesReverseConnection()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var ticket = new Ticket(19.99m, 1);
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         ticket.AddReview(review);
@@ -67,7 +67,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void AddReviewWhenTicketAlreadyHasReview()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
         var ticket = new Ticket(19.99m, 1);
         var review1 = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         var review2 = new ReviewPage("Gulcin", "Altincay", 9, 2,movie);
@@ -80,7 +80,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void SetTicketWhenReviewAlreadyHasTicket()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var ticket1 = new Ticket(19.99m, 1);
         var ticket2 = new Ticket(19.99m, 1);
         var review = new ReviewPage("Gulcin", "Altincay", 9, 2,movie);
@@ -100,7 +100,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void SetTicketWithNull()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         Assert.Throws<ArgumentException>(() => review.SetTicket(null));
     }
@@ -116,7 +116,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void RemoveTicketWhenNoTicketExists()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         Assert.DoesNotThrow(() => review.RemoveTicket());
         Assert.That(review.Ticket, Is.Null);
@@ -127,7 +127,7 @@ public class TicketReviewPageAssociationTests
     {
         var ticket1 = new Ticket(50.0m, 1);
         var ticket2 = new Ticket(60.0m, 2);
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var review1 = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         var review2 = new ReviewPage("Gulcin", "Altincay", 5, 2,movie);
 
@@ -143,7 +143,7 @@ public class TicketReviewPageAssociationTests
     [Test]
     public void UpdateReviewReplacesOldReviewWithNewAndUpdatesReverseConnections()
     {
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var ticket = new Ticket(19.0m, 2);
         var oldReview = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         var newReview = new ReviewPage("Gulcin", "Altincay", 5, 2,movie);
@@ -161,7 +161,7 @@ public class TicketReviewPageAssociationTests
     {
         var oldTicket = new Ticket(20.0m, 1);
         var newTicket = new Ticket(22.0m, 2);
-        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
+        var movie = new Movie(1, "Test", "USA", 1, "test", "test",null, new NormalCut(), new Rerelease(1, "REASON", new DateTime(2025, 6, 10),true));
         var review = new ReviewPage("Mazhar", "Altincay", 8, 1, movie,"Super actings!");
         review.SetTicket(oldTicket);
 

@@ -13,7 +13,7 @@ public class ScreeningAssociationTests
     {
         c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
         Movie.ClearMovies();
-        _movie = new Movie(1, "Test", "PL", 120, "Desc", "Dir",null, new Rerelease(1,"reas",new DateTime(2006,10,6),true));
+        _movie = new Movie(1, "Test", "PL", 120, "Desc", "Dir",null, new NormalCut(), new Rerelease(1,"reas",new DateTime(2006,10,6),true));
         _auditorium = new Auditorium("A1", AuditoriumScreenType._2D, AuditoriumSoundsSystem.Stereo, 1,c1);
     }
 
@@ -61,7 +61,7 @@ public class ScreeningAssociationTests
     [Test]
     public void SetMovie_ShouldSwitchMovieProperly()
     {
-        var movie2 = new Movie(2, "Other", "PL", 90, "x", "y",AgeRestrictionType.PG13, new NewRelease(1,true, new DateTime(2006,10,6),"d"));
+        var movie2 = new Movie(2, "Other", "PL", 90, "x", "y",AgeRestrictionType.PG13, new NormalCut(), new NewRelease(1,true, new DateTime(2006,10,6),"d"));
 
         var screening = new Screening(
             10,

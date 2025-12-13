@@ -1,17 +1,33 @@
 using System.Xml;
 using System.Xml.Serialization;
+using BYT_Entities.Interfaces;
 
 namespace BYT_Entities.Models;
 
 [Serializable]
-public class ExtendedCut
+public class ExtendedCut : ICutType
 {
-    public int Id { get; set; }
-    private static List<ExtendedCut> ExtendedCutsList = new List<ExtendedCut>();
-    private  string _extraScenesDescription;
+    private static List<ExtendedCut> ExtendedCutsList = new();
     private List<string> _addedScenes;
     private int _extraMinutes;
-    public required string ExtraScenesDescription
+    private string _extraScenesDescription;
+
+    public ExtendedCut(int id, string extraScenesDescription, int extraMinutes, List<string> addedScenes)
+    {
+        Id = id;
+        ExtraScenesDescription = extraScenesDescription;
+        ExtraMinutes = extraMinutes;
+        AddedScenes = addedScenes;
+        AddExtendedCutMovie(this);
+    }
+
+    public ExtendedCut()
+    {
+    }
+
+    public int Id { get; set; }
+
+    public string ExtraScenesDescription
     {
         get => _extraScenesDescription;
         set
@@ -21,7 +37,8 @@ public class ExtendedCut
             _extraScenesDescription = value.Trim();
         }
     }
-    public required List<string> AddedScenes
+
+    public List<string> AddedScenes
     {
         get => _addedScenes;
         set
@@ -34,7 +51,8 @@ public class ExtendedCut
             _addedScenes = value.Select(s => s.Trim()).ToList();
         }
     }
-    public required int ExtraMinutes
+
+    public int ExtraMinutes
     {
         get => _extraMinutes;
         set
@@ -45,30 +63,17 @@ public class ExtendedCut
         }
     }
 
-    public ExtendedCut(int id, string extraScenesDescription, int extraMinutes, List<string> addedScenes)
-    {
-        Id = id;
-        ExtraScenesDescription = extraScenesDescription;
-        ExtraMinutes = extraMinutes;
-        AddedScenes = addedScenes;
-        AddExtendedCutMovie(this);
-    }
-
-    public ExtendedCut() { }
     private static void AddExtendedCutMovie(ExtendedCut extendedCut)
     {
-        if (extendedCut == null)
-        {
-            throw new ArgumentException("extended cut cannot be null");
-        }
+        if (extendedCut == null) throw new ArgumentException("extended cut cannot be null");
         ExtendedCutsList.Add(extendedCut);
     }
 
     public static void Save(string path = "extendedcut.xml")
     {
-        StreamWriter file = File.CreateText(path);
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<ExtendedCut>));
-        using (XmlTextWriter writer = new XmlTextWriter(file))
+        var file = File.CreateText(path);
+        var xmlSerializer = new XmlSerializer(typeof(List<ExtendedCut>));
+        using (var writer = new XmlTextWriter(file))
         {
             xmlSerializer.Serialize(writer, ExtendedCutsList);
         }
@@ -78,10 +83,12 @@ public class ExtendedCut
     {
         return new List<ExtendedCut>(ExtendedCutsList);
     }
+
     public static void ClearExtendedCutMovies()
     {
         ExtendedCutsList.Clear();
     }
+
     public static bool Load(string path = "extendedcut.xml")
     {
         StreamReader file;
@@ -94,8 +101,9 @@ public class ExtendedCut
             ExtendedCutsList.Clear();
             return false;
         }
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<ExtendedCut>));
-        using (XmlTextReader reader = new XmlTextReader(file))
+
+        var xmlSerializer = new XmlSerializer(typeof(List<ExtendedCut>));
+        using (var reader = new XmlTextReader(file))
         {
             try
             {
@@ -112,6 +120,23 @@ public class ExtendedCut
                 return false;
             }
         }
+
         return true;
     }
+
+    public string GetCutTypeName()
+    {
+        return "Extended Cut";
+    }
+
+    public int GetExtraMinutes()
+    {
+        return ExtraMinutes;
+    }
+
+    public int GetAddedScenesCount()
+    {
+        return AddedScenes.Count;
+    }
+    
 }

@@ -1,32 +1,36 @@
 using System.Xml;
 using System.Xml.Serialization;
+using BYT_Entities.Interfaces;
 
 namespace BYT_Entities.Models;
+
 [Serializable]
-public class NormalCut
+public class NormalCut : ICutType
 {
-    public int Id { get; set; }
-    private static List<NormalCut> NormalCuts = new List<NormalCut>();
+    private static List<NormalCut> NormalCuts = new();
+
     public NormalCut(int id)
     {
         Id = id;
         AddNormalCut(this);
     }
+
+    public NormalCut() { }
     
+    public int Id { get; set; }
+    
+
     private static void AddNormalCut(NormalCut normalCut)
     {
-        if (normalCut == null)
-        {
-            throw new ArgumentException("normal cut cannot be null");
-        }
+        if (normalCut == null) throw new ArgumentException("normal cut cannot be null");
         NormalCuts.Add(normalCut);
     }
 
     public static void Save(string path = "normalCut.xml")
     {
-        StreamWriter file = File.CreateText(path);
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<NormalCut>));
-        using (XmlTextWriter writer = new XmlTextWriter(file))
+        var file = File.CreateText(path);
+        var xmlSerializer = new XmlSerializer(typeof(List<NormalCut>));
+        using (var writer = new XmlTextWriter(file))
         {
             xmlSerializer.Serialize(writer, NormalCuts);
         }
@@ -44,8 +48,9 @@ public class NormalCut
             NormalCuts.Clear();
             return false;
         }
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<NormalCut>));
-        using (XmlTextReader reader = new XmlTextReader(file))
+
+        var xmlSerializer = new XmlSerializer(typeof(List<NormalCut>));
+        using (var reader = new XmlTextReader(file))
         {
             try
             {
@@ -62,14 +67,27 @@ public class NormalCut
                 return false;
             }
         }
+
         return true;
     }
+
     public static List<NormalCut> GetNormalCutsMovies()
     {
         return new List<NormalCut>(NormalCuts);
     }
+
     public static void ClearNormalCutsMovies()
     {
         NormalCuts.Clear();
+    }
+
+    public string GetCutTypeName()
+    {
+        return "Normal Cut";
+    }
+
+    public int GetExtraMinutes()
+    {
+        return 0;
     }
 }

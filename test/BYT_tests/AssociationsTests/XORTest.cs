@@ -3,7 +3,7 @@ using BYT_Entities.Models;
 
 namespace TestByt;
 
-public class XORTest
+public class XorTest
 {
     [SetUp]
         public void SetUp()
@@ -17,7 +17,7 @@ public class XORTest
         public void CreateMovie_WithNewRelease_ShouldSetReverseConnection()
         {
             var nr = new NewRelease(1, true, DateTime.Now, "Disney");
-            var movie = new Movie(1, "Title", "USA", 100, "Desc", "Dir", AgeRestrictionType.PG13, nr);
+            var movie = new Movie(1, "Title", "USA", 100, "Desc", "Dir", AgeRestrictionType.PG13, new NormalCut(), nr);
 
             Assert.AreEqual(nr, movie.NewRelease);
             Assert.AreEqual(movie, nr.Movie);
@@ -27,7 +27,7 @@ public class XORTest
         public void CreateMovie_WithRerelease_ShouldSetReverseConnection()
         {
             var rr = new Rerelease(1, "Reason", DateTime.Now, false);
-            var movie = new Movie(1, "Title", "USA", 100, "Desc", "Dir", AgeRestrictionType.PG13, rr);
+            var movie = new Movie(1, "Title", "USA", 100, "Desc", "Dir", AgeRestrictionType.PG13, new NormalCut(), rr);
 
             Assert.AreEqual(rr, movie.Rerelease);
             Assert.AreEqual(movie, rr.Movie);
@@ -39,7 +39,7 @@ public class XORTest
             var rr = new Rerelease(1, "Reason", DateTime.Now, false);
             var nr = new NewRelease(2, true, DateTime.Now, "Warner");
 
-            var movie = new Movie(1, "T", "C", 90, "D", "X", null, rr);
+            var movie = new Movie(1, "T", "C", 90, "D", "X", null,  new NormalCut(),rr);
 
             Assert.Throws<InvalidOperationException>(() => movie.SetNewRelease(nr));
         }
@@ -50,7 +50,7 @@ public class XORTest
             var nr = new NewRelease(1, true, DateTime.Now, "Sony");
             var rr = new Rerelease(2, "Reason", DateTime.Now, false);
 
-            var movie = new Movie(1, "T", "C", 100, "D", "X", null, nr);
+            var movie = new Movie(1, "T", "C", 100, "D", "X", null,  new NormalCut(),nr);
 
             Assert.Throws<InvalidOperationException>(() => movie.SetRerelease(rr));
         }
@@ -59,7 +59,7 @@ public class XORTest
         public void RemoveNewRelease_ShouldBreakReverseConnection()
         {
             var nr = new NewRelease(1, true, DateTime.Now, "Universal");
-            var movie = new Movie(1, "Movie", "USA", 100, "D", "X", null, nr);
+            var movie = new Movie(1, "Movie", "USA", 100, "D", "X", null, new NormalCut(), nr);
 
             movie.RemoveNewRelease();
 
@@ -71,7 +71,7 @@ public class XORTest
         public void RemoveRerelease_ShouldBreakReverseConnection()
         {
             var rr = new Rerelease(1, "Reason", DateTime.Now, true);
-            var movie = new Movie(1, "Movie", "USA", 100, "D", "X", null, rr);
+            var movie = new Movie(1, "Movie", "USA", 100, "D", "X", null, new NormalCut(), rr);
 
             movie.RemoveRerelease();
 
@@ -86,7 +86,7 @@ public class XORTest
             var nr1 = new NewRelease(1, true, DateTime.Now, "A24");
             var nr2 = new NewRelease(2, false, DateTime.Now, "Netflix");
 
-            var movie = new Movie(1, "T", "C", 100, "D", "X", null, nr1);
+            var movie = new Movie(1, "T", "C", 100, "D", "X", null, new NormalCut(), nr1);
 
             movie.UpdateNewRelease(nr2);
 
@@ -101,7 +101,7 @@ public class XORTest
             var rr1 = new Rerelease(1, "Old", DateTime.Now, false);
             var rr2 = new Rerelease(2, "New", DateTime.Now, true);
 
-            var movie = new Movie(1, "T", "C", 100, "D", "X", null, rr1);
+            var movie = new Movie(1, "T", "C", 100, "D", "X", null, new NormalCut(), rr1);
 
             movie.UpdateRerelease(rr2);
 
@@ -114,14 +114,14 @@ public class XORTest
         [Test]
         public void SetNewRelease_WithNull_ShouldThrow()
         {
-            var movie = new Movie(1, "T", "C", 80, "D", "X", null, new NewRelease());
+            var movie = new Movie(1, "T", "C", 80, "D", "X", null, new NormalCut(), new NewRelease());
             Assert.Throws<ArgumentException>(() => movie.SetNewRelease(null));
         }
 
         [Test]
         public void SetRerelease_WithNull_ShouldThrow()
         {
-            var movie = new Movie(1, "T", "C", 80, "D", "X",null, new Rerelease());
+            var movie = new Movie(1, "T", "C", 80, "D", "X",null, new NormalCut(), new Rerelease());
             Assert.Throws<ArgumentException>(() => movie.SetRerelease(null));
         }
 
@@ -131,7 +131,7 @@ public class XORTest
             var rr = new Rerelease(1, "R", DateTime.Now, false);
             var nr = new NewRelease(2, true, DateTime.Now, "Disney");
 
-            var movie = new Movie(1, "T", "C", 80, "D", "X", null, rr);
+            var movie = new Movie(1, "T", "C", 80, "D", "X", null, new NormalCut(), rr);
 
             Assert.Throws<InvalidOperationException>(() => movie.UpdateNewRelease(nr));
         }
@@ -142,7 +142,7 @@ public class XORTest
             var rr = new Rerelease(1, "R", DateTime.Now, false);
             var nr = new NewRelease(2, true, DateTime.Now, "Disney");
 
-            var movie = new Movie(1, "T", "C", 80, "D", "X", null, nr);
+            var movie = new Movie(1, "T", "C", 80, "D", "X", null, new NormalCut(), nr);
 
             Assert.Throws<InvalidOperationException>(() => movie.UpdateRerelease(rr));
         }
