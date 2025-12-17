@@ -6,7 +6,10 @@ using BYT_Entities.Interfaces;
 namespace BYT_Entities.Models;
 
 [Serializable]
-public class Movie
+[XmlInclude(typeof(NormalCut))]
+[XmlInclude(typeof(DirectorCut))]
+[XmlInclude(typeof(ExtendedCut))]
+public abstract class Movie
 {
     public int Id { get; set; }
     private string _title;
@@ -15,6 +18,10 @@ public class Movie
     private string _description;
     private string _director;
     private static List<Movie> MoviesList = new List<Movie>();
+    //FOR NEW 
+    private readonly HashSet<IGenreType> _genres = new();
+    [XmlIgnore]
+    public IReadOnlyCollection<IGenreType> Genres => _genres;
     
     public AgeRestrictionType? AgeRestriction { get; set; }
     private HashSet<ReviewPage> _reviews = new();
@@ -31,16 +38,6 @@ public class Movie
     public NewRelease? NewRelease { get; private set; }
     [XmlIgnore]
     public Rerelease? Rerelease { get; private set; }
-    
-    private ICutType _cutType;
-    
-    [XmlIgnore]
-    public ICutType CutType 
-    { 
-        get => _cutType;
-        private set => _cutType = value ?? throw new ArgumentException("CutType cannot be null");
-    }
-    
     
     public static List<Movie> GetMovies()
     {
@@ -101,18 +98,9 @@ public class Movie
         }
     }
     
-    // helper methods
-    public bool IsNormalCut() => _cutType is NormalCut;
-    public bool IsDirectorCut() => _cutType is DirectorCut;
-    public bool IsExtendedCut() => _cutType is ExtendedCut;
-    public DirectorCut? GetAsDirectorCut() => _cutType as DirectorCut;
-    public ExtendedCut? GetAsExtendedCut() => _cutType as ExtendedCut;
-    public NormalCut? GetAsNormalCut() => _cutType as NormalCut;
+   
     
-    public int GetTotalRuntime() => Length + (_cutType?.GetExtraMinutes() ?? 0);
-    public string GetCutTypeName() => _cutType?.GetCutTypeName() ?? "Unknown";
-    
-    public Movie(int id, string title, string countryOfOrigin, int length, string description, string director, AgeRestrictionType? ageRestriction, ICutType? cutType, NewRelease newRelease)
+    public Movie(int id, string title, string countryOfOrigin, int length, string description, string director, AgeRestrictionType? ageRestriction, NewRelease newRelease,  IEnumerable<IGenreType> genres)
     {
         Id = id;
         Title = title;
@@ -121,12 +109,11 @@ public class Movie
         Description = description;
         Director = director;
         AgeRestriction = ageRestriction;
-        CutType = cutType ?? new NormalCut(id);
-
+        InitializeGenres(genres);
         AddMovie(this);
         SetNewRelease(newRelease);
     }
-    public Movie(int id, string title, string countryOfOrigin, int length, string description, string director, AgeRestrictionType? ageRestriction, ICutType? cutType, Rerelease rerelease)
+    public Movie(int id, string title, string countryOfOrigin, int length, string description, string director, AgeRestrictionType? ageRestriction, Rerelease rerelease,  IEnumerable<IGenreType> genres)
     {
         Id = id;
         Title = title;
@@ -135,12 +122,11 @@ public class Movie
         Description = description;
         Director = director;
         AgeRestriction = ageRestriction;
-        CutType = cutType ?? new NormalCut(id);
+        InitializeGenres(genres);
         AddMovie(this);
         SetRerelease(rerelease);
     }
 
-    public Movie() { }
     private static void AddMovie(Movie movie)
     {
         if (movie == null)
@@ -348,8 +334,28 @@ public class Movie
     {
         _screenings.Remove(screening);
     }
+    
+    //for new 
+    protected void InitializeGenres(IEnumerable<IGenreType> genres)
+    {
+        if (genres == null || !genres.Any())
+            throw new ArgumentException("Movie must have at least one genre");
+
+        foreach (var genre in genres)
+            _genres.Add(genre);
+    }
+    public bool IsComedy() => _genres.Any(g => g is ComedyMovie);
+    public bool IsHorror() => _genres.Any(g => g is HorrorMovie);
+    public bool IsRomance() => _genres.Any(g => g is RomanceMovie);
+
+    public ComedyMovie? GetComedy() => _genres.OfType<ComedyMovie>().FirstOrDefault();
+    public HorrorMovie? GetHorror() => _genres.OfType<HorrorMovie>().FirstOrDefault();
+    public RomanceMovie? GetRomance() => _genres.OfType<RomanceMovie>().FirstOrDefault();
 
 
+    public abstract int GetTotalRuntime();
+    public abstract string GetCutName();
+    public Movie () {}
 
     /*
     for later to implement when we do associations, since they both need to connect to review 
