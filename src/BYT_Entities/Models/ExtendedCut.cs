@@ -1,117 +1,102 @@
 using System.Xml;
 using System.Xml.Serialization;
+using BYT_Entities.Enums;
+using BYT_Entities.Interfaces;
 
 namespace BYT_Entities.Models;
 
 [Serializable]
-public class ExtendedCut
+public class ExtendedCut : Movie
 {
-    public int Id { get; set; }
-    private static List<ExtendedCut> ExtendedCutsList = new List<ExtendedCut>();
-    private  string _extraScenesDescription;
-    private List<string> _addedScenes;
     private int _extraMinutes;
-    public required string ExtraScenesDescription
-    {
-        get => _extraScenesDescription;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("cannot be null");
-            _extraScenesDescription = value.Trim();
-        }
-    }
-    public required List<string> AddedScenes
-    {
-        get => _addedScenes;
-        set
-        {
-            if (value == null)
-                throw new ArgumentException("cannot be null");
-            if (value.Any(s => string.IsNullOrWhiteSpace(s)))
-                throw new ArgumentException("cannot be empty string");
+    private string _extraScenesDescription;
+    private List<string> _addedScenes;
+    public ExtendedCut() { }
 
-            _addedScenes = value.Select(s => s.Trim()).ToList();
-        }
+    public ExtendedCut(
+        int id,
+        string title,
+        string countryOfOrigin,
+        int length,
+        string description,
+        string director,
+        AgeRestrictionType? ageRestriction,
+        IEnumerable<IGenreType> genres,
+        int extraMinutes,
+        string extraScenesDescription,
+        List<string> addedScenes,
+        NewRelease? newRelease = null
+    )
+        : base(id, title, countryOfOrigin, length, description,
+               director, ageRestriction, newRelease, genres)
+    {
+        ExtraMinutes = extraMinutes;
+        ExtraScenesDescription = extraScenesDescription;
+        AddedScenes = addedScenes;
     }
-    public required int ExtraMinutes
+
+    public ExtendedCut(
+        int id,
+        string title,
+        string countryOfOrigin,
+        int length,
+        string description,
+        string director,
+        AgeRestrictionType? ageRestriction,
+        IEnumerable<IGenreType> genres,
+        int extraMinutes,
+        string extraScenesDescription,
+        List<string> addedScenes,
+        Rerelease? rerelease = null
+    )
+        : base(id, title, countryOfOrigin, length, description,
+               director, ageRestriction, rerelease, genres)
+    {
+        ExtraMinutes = extraMinutes;
+        ExtraScenesDescription = extraScenesDescription;
+        AddedScenes = addedScenes;
+    }
+
+    public int ExtraMinutes
     {
         get => _extraMinutes;
-        set
+        private set
         {
             if (value < 1)
-                throw new ArgumentOutOfRangeException(nameof(value), "must be greater than 0");
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    "Extra minutes must be at least 1.");
             _extraMinutes = value;
         }
     }
 
-    public ExtendedCut(int id, string extraScenesDescription, int extraMinutes, List<string> addedScenes)
+    public string ExtraScenesDescription
     {
-        Id = id;
-        ExtraScenesDescription = extraScenesDescription;
-        ExtraMinutes = extraMinutes;
-        AddedScenes = addedScenes;
-        AddExtendedCutMovie(this);
-    }
-
-    public ExtendedCut() { }
-    private static void AddExtendedCutMovie(ExtendedCut extendedCut)
-    {
-        if (extendedCut == null)
+        get => _extraScenesDescription;
+        private set
         {
-            throw new ArgumentException("extended cut cannot be null");
-        }
-        ExtendedCutsList.Add(extendedCut);
-    }
-
-    public static void Save(string path = "extendedcut.xml")
-    {
-        StreamWriter file = File.CreateText(path);
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<ExtendedCut>));
-        using (XmlTextWriter writer = new XmlTextWriter(file))
-        {
-            xmlSerializer.Serialize(writer, ExtendedCutsList);
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Extra scenes description cannot be empty.");
+            _extraScenesDescription = value.Trim();
         }
     }
 
-    public static List<ExtendedCut> GetExtendedCutMovies()
+    public List<string> AddedScenes
     {
-        return new List<ExtendedCut>(ExtendedCutsList);
-    }
-    public static void ClearExtendedCutMovies()
-    {
-        ExtendedCutsList.Clear();
-    }
-    public static bool Load(string path = "extendedcut.xml")
-    {
-        StreamReader file;
-        try
+        get => _addedScenes;
+        private set
         {
-            file = File.OpenText(path);
+            if (value == null)
+                throw new ArgumentException("Added scenes cannot be null.");
+            if (value.Any(s => string.IsNullOrWhiteSpace(s)))
+                throw new ArgumentException("Added scenes cannot contain empty values.");
+
+            _addedScenes = value.Select(s => s.Trim()).ToList();
         }
-        catch (FileNotFoundException)
-        {
-            ExtendedCutsList.Clear();
-            return false;
-        }
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<ExtendedCut>));
-        using (XmlTextReader reader = new XmlTextReader(file))
-        {
-            try
-            {
-                ExtendedCutsList = (List<ExtendedCut>)xmlSerializer.Deserialize(reader);
-            }
-            catch (InvalidCastException)
-            {
-                ExtendedCutsList.Clear();
-                return false;
-            }
-            catch (Exception)
-            {
-                ExtendedCutsList.Clear();
-                return false;
-            }
-        }
-        return true;
     }
+
+    public int GetAddedScenesCount() => AddedScenes.Count;
+
+    public override int GetTotalRuntime() => Length + ExtraMinutes;
+
+    public override string GetCutName() => "Extended Cut";
 }

@@ -1,113 +1,99 @@
 using System.Xml;
 using System.Xml.Serialization;
+using BYT_Entities.Enums;
+using BYT_Entities.Interfaces;
 
 namespace BYT_Entities.Models;
 
 [Serializable]
-public class DirectorCut
+public class DirectorCut : Movie
 {
-    private static List<DirectorCut> DirectorsCutList = new List<DirectorCut>();
-    public int Id { get; set; }
-
     private int _extraMinutes;
-    private string? _alternativeEnding;
     private string _changesDescription;
-    public int ExtraMinutes
+    private string? _alternativeEnding;
+    public DirectorCut() { }
+
+    public DirectorCut(
+        int id,
+        string title,
+        string countryOfOrigin,
+        int length,
+        string description,
+        string director,
+        AgeRestrictionType? ageRestriction,
+        IEnumerable<IGenreType> genres,
+        int extraMinutes,
+        string changesDescription,
+        string? alternativeEnding = null,
+        NewRelease? newRelease = null
+    )
+        : base(id, title, countryOfOrigin, length, description,
+               director, ageRestriction, newRelease, genres)
     {
-        get => _extraMinutes;
-        set
-        {
-            if (value < 1)
-                throw new ArgumentOutOfRangeException(nameof(value), "must be greater than or equal to 1");
-            _extraMinutes = value;
-        }
-    }
-    public string? AlternativeEnding
-    {
-        get => _alternativeEnding;
-        set
-        {
-            if (value != null && string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("cannot be an empty string");
-            _alternativeEnding = value?.Trim();
-        }
-    }
-    public string ChangesDescription
-    {
-        get => _changesDescription;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("cannot be null");
-            _changesDescription = value.Trim();
-        }
-    }
-    public static List<DirectorCut> GetDirectorCutsMovies()
-    {
-        return new List<DirectorCut>(DirectorsCutList);
-    }
-    public static void ClearDirectorCutsMovies()
-    {
-        DirectorsCutList.Clear();
-    }
-    public DirectorCut(int id, int extraMinutes, string changesDescription, string? alternativeEnding = null)
-    {
-        Id = id;
         ExtraMinutes = extraMinutes;
         ChangesDescription = changesDescription;
         AlternativeEnding = alternativeEnding;
-        AddDirectorCut(this);
-    }
-    public DirectorCut() { }
-    private static void AddDirectorCut(DirectorCut directorCut)
-    {
-        if (directorCut == null)
-        {
-            throw new ArgumentException("directorCut cannot be null");
-        }
-       DirectorsCutList.Add(directorCut);
     }
 
-    public static void Save(string path = "directorcutmovies.xml")
+    public DirectorCut(
+        int id,
+        string title,
+        string countryOfOrigin,
+        int length,
+        string description,
+        string director,
+        AgeRestrictionType? ageRestriction,
+        IEnumerable<IGenreType> genres,
+        int extraMinutes,
+        string changesDescription,
+        string? alternativeEnding = null,
+        Rerelease? rerelease = null
+    )
+        : base(id, title, countryOfOrigin, length, description,
+               director, ageRestriction, rerelease, genres)
     {
-        StreamWriter file = File.CreateText(path);
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<DirectorCut>));
-        using (XmlTextWriter writer = new XmlTextWriter(file))
+        ExtraMinutes = extraMinutes;
+        ChangesDescription = changesDescription;
+        AlternativeEnding = alternativeEnding;
+    }
+
+    public int ExtraMinutes
+    {
+        get => _extraMinutes;
+        private set
         {
-            xmlSerializer.Serialize(writer, DirectorsCutList);
+            if (value < 1)
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    "Extra minutes must be at least 1.");
+            _extraMinutes = value;
         }
     }
 
-    public static bool Load(string path = "directorcutmovies.xml")
+    public string ChangesDescription
     {
-        StreamReader file;
-        try
+        get => _changesDescription;
+        private set
         {
-            file = File.OpenText(path);
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Changes description cannot be empty.");
+            _changesDescription = value.Trim();
         }
-        catch (FileNotFoundException)
-        {
-            DirectorsCutList.Clear();
-            return false;
-        }
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<DirectorCut>));
-        using (XmlTextReader reader = new XmlTextReader(file))
-        {
-            try
-            {
-                DirectorsCutList = (List<DirectorCut>)xmlSerializer.Deserialize(reader);
-            }
-            catch (InvalidCastException)
-            {
-                DirectorsCutList.Clear();
-                return false;
-            }
-            catch (Exception)
-            {
-                DirectorsCutList.Clear();
-                return false;
-            }
-        }
-        return true;
     }
+
+    public string? AlternativeEnding
+    {
+        get => _alternativeEnding;
+        private set
+        {
+            if (value != null && string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Alternative ending cannot be empty.");
+            _alternativeEnding = value?.Trim();
+        }
+    }
+
+    public bool HasAlternativeEnding() => AlternativeEnding != null;
+
+    public override int GetTotalRuntime() => Length + ExtraMinutes;
+
+    public override string GetCutName() => "Director Cut";
 }

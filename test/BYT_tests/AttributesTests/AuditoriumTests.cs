@@ -1,5 +1,7 @@
 ﻿using BYT_Entities.Enums;
+using BYT_Entities.Interfaces;
 using BYT_Entities.Models;
+using NUnit.Framework;
 
 namespace TestByt;
 
@@ -7,15 +9,19 @@ public class AuditoriumTests
 {
     private Auditorium _auditorium;
     private Movie _movie;
+    private Cinema c1;
 
     [SetUp]
     public void Setup()
     {
+        c1 = new Cinema(1, "C1", "A", "1", "a@a.com", "10-20");
+
         _auditorium = new Auditorium(
             "Salon 1",
             AuditoriumScreenType._2D,
             AuditoriumSoundsSystem.Stereo,
-            1
+            1,
+            c1
         );
 
         for (var i = 0; i < 15; i++)
@@ -24,8 +30,25 @@ public class AuditoriumTests
             _auditorium.SetSeat(seat);
         }
 
-        _movie = new Movie(1, "Movie 1", "Turkey", 105, "Agree to Julia", "Mazhar Altincay", AgeRestrictionType.PG13,
-            new Rerelease(1, "REASON",new DateTime(2025, 6, 10),true));
+        _movie = new NormalCut(
+            id: 1,
+            title: "Movie 1",
+            countryOfOrigin: "Turkey",
+            length: 105,
+            description: "Agree to Julia",
+            director: "Mazhar Altincay",
+            ageRestriction: AgeRestrictionType.PG13,
+            genres: new IGenreType[]
+            {
+                new ComedyMovie("satire")
+            },
+            reRelease: new Rerelease(
+                1,
+                "REASON",
+                new DateTime(2025, 6, 10),
+                true
+            )
+        );
     }
 
     [Test]
@@ -46,7 +69,8 @@ public class AuditoriumTests
     [Test]
     public void Auditorium_SetInvalidScreenType_ThrowsException()
     {
-        Assert.Throws<ArgumentException>(() => _auditorium.AuditoriumScreenType = (AuditoriumScreenType)999);
+        Assert.Throws<ArgumentException>(() =>
+            _auditorium.AuditoriumScreenType = (AuditoriumScreenType)999);
     }
 
     [Test]
@@ -54,8 +78,14 @@ public class AuditoriumTests
     {
         Assert.DoesNotThrow(() =>
         {
-            var minimalAuditorium = new Auditorium("Mini Salon", AuditoriumScreenType._2D,
-                AuditoriumSoundsSystem.Stereo, 2);
+            var minimalAuditorium = new Auditorium(
+                "Mini Salon",
+                AuditoriumScreenType._2D,
+                AuditoriumSoundsSystem.Stereo,
+                2,
+                c1
+            );
+
             Assert.That(minimalAuditorium.Seats.Count, Is.EqualTo(0));
         });
     }
@@ -76,7 +106,6 @@ public class AuditoriumTests
         Assert.Throws<ArgumentException>(() => _auditorium.SetSeat(null!));
     }
 
-
     [Test]
     public void AuditoriumRemoveNonExistentSeatThrowsException()
     {
@@ -84,6 +113,7 @@ public class AuditoriumTests
 
         var exception = Assert.Throws<InvalidOperationException>(() =>
             _auditorium.RemoveSeat(nonExistentSeat));
+
         Assert.That(exception.Message, Does.Contain("not found"));
     }
 }

@@ -15,6 +15,10 @@ public class Screening
     private TimeSpan _startTime;
     private ScreeningStatus _status;
     private ScreeningVersion _version;
+    [XmlIgnore]
+    public Movie Movie => _movie;
+    [XmlIgnore]
+    public Auditorium Auditorium => _auditorium;
     
     private readonly Dictionary<string, Ticket> _ticketsBySeatCode = new();
     public IReadOnlyDictionary<string, Ticket> TicketsBySeatCode => _ticketsBySeatCode;
@@ -23,18 +27,13 @@ public class Screening
         ScreeningFormat format, ScreeningVersion version)
     {
         Id = id;
-        Movie = movie ?? throw new ArgumentException("Movie cannot be null");
-        movie.AddScreening(this);
-
-        Auditorium = auditorium ?? throw new ArgumentException("Auditorium cannot be null");
-        auditorium.AddScreening(this);
-
         Date = date;
         StartTime = startTime;
         Format = format;
         Version = version;
         Status = ScreeningStatus.Planned;
-
+        SetMovie(movie ?? throw new ArgumentException("Movie cannot be null."));
+        SetAuditorium(auditorium ?? throw new ArgumentException("Auditorium cannot be null."));
         AddScreening(this);
     }
 
@@ -44,29 +43,7 @@ public class Screening
     }
 
     public int Id { get; set; }
-
-    public Movie Movie
-    {
-        get => _movie;
-        set
-        {
-            if (value == null)
-                throw new ArgumentException("Movie cannot be null.");
-            _movie = value;
-        }
-    }
-
-    public Auditorium Auditorium
-    {
-        get => _auditorium;
-        set
-        {
-            if (value == null)
-                throw new ArgumentException("Auditorium cannot be null.");
-            _auditorium = value;
-        }
-    }
-
+    
     public DateTime Date
     {
         get => _date;
@@ -173,15 +150,11 @@ public class Screening
             return;
 
         if (_movie != null)
-            _movie.RemoveScreening(this);
+            _movie.RemoveScreeningInternal(this);
 
         _movie = movie;
-
-        if (!movie.Screenings.Contains(this))
-            movie.AddScreening(this);
+        _movie.AddScreeningInternal(this);
     }
-
-
 
     public void RemoveMovie()
     {
@@ -190,12 +163,9 @@ public class Screening
 
         var oldMovie = _movie;
         _movie = null;
-
-        if (oldMovie.Screenings.Contains(this))
-            oldMovie.RemoveScreening(this);
+        oldMovie.RemoveScreeningInternal(this);
     }
-
-
+    
     public void SetAuditorium(Auditorium auditorium)
     {
         if (auditorium == null)
@@ -205,24 +175,22 @@ public class Screening
             return;
 
         if (_auditorium != null)
-            _auditorium.RemoveScreening(this);
+            _auditorium.RemoveScreeningInternal(this);
 
         _auditorium = auditorium;
-
-        auditorium.AddScreening(this);
+        _auditorium.AddScreeningInternal(this);
     }
-
 
     public void RemoveAuditorium()
     {
         if (_auditorium == null)
             return;
-        
+
         var oldAuditorium = _auditorium;
         _auditorium = null;
-
-        oldAuditorium.RemoveScreening(this);
+        oldAuditorium.RemoveScreeningInternal(this);
     }
+
 
     
     public void RemoveCompletely()

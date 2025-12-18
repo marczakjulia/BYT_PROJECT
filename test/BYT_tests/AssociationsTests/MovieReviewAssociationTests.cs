@@ -1,8 +1,9 @@
 namespace TestByt;
 
+using BYT_Entities.Enums;
+using BYT_Entities.Interfaces;
 using BYT_Entities.Models;
 using NUnit.Framework;
-
 
 public class MovieReviewAssociationTests
 {
@@ -12,9 +13,25 @@ public class MovieReviewAssociationTests
     public void Setup()
     {
         Movie.ClearMovies();
-        _movie = new Movie(1, "TestMovie", "USA", 120, "desc", "dir", null,
-            new Rerelease(1, "rr", DateTime.Now, true));
+
+        var genres = new IGenreType[]
+        {
+            new ComedyMovie("Satire")
+        };
+
+        _movie = new NormalCut(
+            id: 1,
+            title: "TestMovie",
+            countryOfOrigin: "USA",
+            length: 120,
+            description: "desc",
+            director: "dir",
+            ageRestriction: null,
+            genres: genres,
+            reRelease: new Rerelease(1, "rr", DateTime.Now, true)
+        );
     }
+
     [Test]
     public void ReviewConstructor_ShouldCreateBidirectionalLink()
     {
@@ -23,14 +40,16 @@ public class MovieReviewAssociationTests
         Assert.That(_movie.GetReviews().Contains(review));
         Assert.That(review.Movie, Is.EqualTo(_movie));
     }
+
     [Test]
     public void AddReview_ShouldAddToMovieAndSetReverseConnection()
     {
         var review = new ReviewPage("A", "B", 7, 1, _movie);
+
         Assert.That(_movie.GetReviews().Contains(review));
         Assert.That(review.Movie, Is.EqualTo(_movie));
     }
-    
+
     [Test]
     public void RemoveReview_ShouldRemoveFromBothSides()
     {
@@ -41,11 +60,26 @@ public class MovieReviewAssociationTests
         Assert.That(_movie.GetReviews().Contains(review), Is.False);
         Assert.That(review.Movie, Is.Null);
     }
+
     [Test]
     public void SetMovie_ShouldSwitchMovieProperly()
     {
-        var movie2 = new Movie(2, "Other", "UK", 90, "d", "x", null,
-            new Rerelease(2, "r", DateTime.Now, false));
+        var genres = new IGenreType[]
+        {
+            new ComedyMovie("Dark comedy")
+        };
+
+        var movie2 = new NormalCut(
+            id: 2,
+            title: "Other",
+            countryOfOrigin: "UK",
+            length: 90,
+            description: "d",
+            director: "x",
+            ageRestriction: null,
+            genres: genres,
+            reRelease: new Rerelease(2, "r", DateTime.Now, false)
+        );
 
         var review = new ReviewPage("A", "B", 8, 1, _movie);
 
@@ -68,34 +102,36 @@ public class MovieReviewAssociationTests
         Assert.That(_movie.GetReviews().Contains(r2));
         Assert.That(_movie.GetReviews().Contains(r3));
     }
-    
+
     [Test]
     public void AddReview_ShouldThrow_WhenNull()
     {
         Assert.Throws<ArgumentException>(() => _movie.AddReview(null));
     }
-    
+
     [Test]
     public void ReviewConstructor_ShouldThrow_WhenMovieIsNull()
     {
         Assert.Throws<ArgumentException>(() =>
             new ReviewPage("A", "B", 8, 1, null));
     }
+
     [Test]
     public void RemoveReview_ShouldThrow_WhenNotAssociated()
     {
         var r = new ReviewPage("A", "B", 8, 1, _movie);
-        _movie.RemoveReview(r); // first remove succeeds
+        _movie.RemoveReview(r);
 
         Assert.Throws<InvalidOperationException>(() => _movie.RemoveReview(r));
     }
+
     [Test]
     public void GetReviews_ShouldReturnCopy_NotActualCollection()
     {
         var r = new ReviewPage("A", "B", 8, 1, _movie);
 
         var copy = _movie.GetReviews();
-        copy.Clear(); 
+        copy.Clear();
 
         Assert.That(_movie.GetReviews().Count, Is.EqualTo(1));
     }
