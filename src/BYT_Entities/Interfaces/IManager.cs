@@ -10,4 +10,11 @@ public interface IManager
 
     double GetBonus();
     void ChangeToWorker(ShiftType shift, WorkType type, double hourlyRate);
+    //added but not in the diagram 
+    IManager GetSupervisor();
+    HashSet<IManager> GetSubordinates();
+
+    void SetSupervisor(IManager supervisor);
+    void AddSubordinate(IManager subordinate);
+    void RemoveSubordinate(IManager subordinate);
 }

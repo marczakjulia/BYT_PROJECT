@@ -27,19 +27,23 @@ public class EmployeeCinemaAssociationTests
             email: "boss@test.com",
             dayOfBirth: DateTime.Now.AddYears(-25),
             hireDate: DateTime.Now.AddYears(-2),
-            salary: 3000,
             address: new Address("s", "1", "c", "00-000", "PL"),
             status: EmployeeStatus.Working,
-            cinemas: new List<Cinema> { c1 }
+            cinemas: new List<Cinema> { c1 },
+
+            // Worker-specific
+            shift: ShiftType.Morning,
+            typeOfWork: WorkType.Cashier,
+            hourlyRate: 25.0
         );
     }
+
     [Test]
     public void AddCinema_ShouldCreateReverseConnection()
     {
         e1.AddCinema(c2);
 
         Assert.IsTrue(e1.GetCinemas().Contains(c2));
-
         Assert.IsTrue(c2.GetEmployees().Contains(e1));
     }
 
@@ -52,7 +56,6 @@ public class EmployeeCinemaAssociationTests
         e1.RemoveCinema(c1);
 
         Assert.IsFalse(e1.GetCinemas().Contains(c1));
-
         Assert.IsFalse(c1.GetEmployees().Contains(e1));
     }
 

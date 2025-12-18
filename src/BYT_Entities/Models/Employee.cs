@@ -432,65 +432,71 @@ public class Employee
         return bonus;
     }
     
-    public Manager GetSupervisor()
+    public IManager GetSupervisor()
     {
         return _supervisor;
     }
-    public HashSet<Manager> GetSubordinates()
+
+    public HashSet<IManager> GetSubordinates()
     {
-        return new HashSet<Manager>(_subordinates);
+        return new HashSet<IManager>(_subordinates);
     }
-    public void SetSupervisor(Manager supervisor)
+    public void SetSupervisor(IManager supervisor)
     {
-        if (supervisor == this)
+        if (ReferenceEquals(supervisor, this))
             throw new InvalidOperationException("A manager cannot supervise themselves.");
 
         if (supervisor == null)
         {
-            if (_supervisor != null)
-                _supervisor.RemoveSubordinateInternal(this);
-
+            _supervisor?.RemoveSubordinateInternal(this);
             _supervisor = null;
             return;
         }
-        
-        if (_supervisor == supervisor)
-            throw new InvalidOperationException("This manager is already supervised by that manager.");
-        
-        if (_supervisor != null)
-            _supervisor.RemoveSubordinateInternal(this);
 
-        _supervisor = supervisor;
-        supervisor.AddSubordinateInternal(this);
+        if (supervisor is not Manager m)
+            throw new InvalidOperationException("Supervisor must be a Manager.");
+
+        if (_supervisor == m)
+            throw new InvalidOperationException("This manager is already supervised by that manager.");
+
+        _supervisor?.RemoveSubordinateInternal(this);
+        _supervisor = m;
+        m.AddSubordinateInternal(this);
     }
     
-    public void AddSubordinate(Manager subordinate)
+    public void AddSubordinate(IManager subordinate)
     {
         if (subordinate == null)
             throw new ArgumentException("Subordinate cannot be null.");
 
-        if (subordinate == this)
+        if (ReferenceEquals(subordinate, this))
             throw new InvalidOperationException("A manager cannot be their own subordinate.");
 
-        if (_subordinates.Contains(subordinate))
+        if (subordinate is not Manager m)
+            throw new InvalidOperationException("Subordinate must be a Manager.");
+
+        if (_subordinates.Contains(m))
             throw new InvalidOperationException("This manager already supervises the subordinate.");
 
-        _subordinates.Add(subordinate);
-
-        subordinate.SetSupervisorInternal(this);
+        _subordinates.Add(m);
+        m.SetSupervisorInternal(this);
     }
-    public void RemoveSubordinate(Manager subordinate)
+
+    public void RemoveSubordinate(IManager subordinate)
     {
         if (subordinate == null)
             throw new ArgumentException("Subordinate cannot be null.");
 
-        if (!_subordinates.Contains(subordinate))
+        if (subordinate is not Manager m)
+            throw new InvalidOperationException("Subordinate must be a Manager.");
+
+        if (!_subordinates.Contains(m))
             throw new InvalidOperationException("This subordinate is not supervised by this manager.");
 
-        _subordinates.Remove(subordinate);
-
-        subordinate.RemoveSupervisorInternal(this);
+        _subordinates.Remove(m);
+        m.RemoveSupervisorInternal(this);
     }
+
     internal void AddSubordinateInternal(Manager subordinate)
     {
         _subordinates.Add(subordinate);
