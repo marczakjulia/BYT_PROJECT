@@ -86,14 +86,24 @@ public class Employee
 
         _manager = new Manager(this, department, baseSalary, bonusPercentage);
     }
-    
-        private void SwitchToManager(
+
+    private void ValidateSpecialization()
+    {
+        if ((_worker == null && _manager == null) ||
+            (_worker != null && _manager != null))
+            throw new InvalidOperationException(
+                "Employee must have exactly one role.");
+    }
+
+
+    private void SwitchToManager(
         string department,
         double baseSalary,
         double bonusPercentage)
     {
         _worker = null;
         _manager = new Manager(this, department, baseSalary, bonusPercentage);
+        ValidateSpecialization();
     }
 
     private void SwitchToWorker(
@@ -103,6 +113,7 @@ public class Employee
     {
         _manager = null;
         _worker = new Worker(this, shift, typeOfWork, hourlyRate);
+        ValidateSpecialization();
     }
     
     public static List<Employee> GetEmployees()
