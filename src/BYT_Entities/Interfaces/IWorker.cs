@@ -9,6 +9,5 @@ public interface IWorker
     int HoursWorked { get; }
     double HourlyRate { get; }
 
-    double CalculateSalary();
-    void ChangeToManager(double baseSalary, double bonusPercentage);
+    void ChangeToManager(string department, double baseSalary, double bonusPercentage);
 }

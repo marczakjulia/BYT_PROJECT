@@ -19,7 +19,91 @@ public class Employee
     private Address _address;
     private static List<Employee> employeesList = new List<Employee>();
     private HashSet<Cinema> _cinemas = new HashSet<Cinema>();
+    private IWorker _worker;
+    private IManager _manager;
 
+    public IWorker WorkerEmp => _worker;
+    public IManager ManagerEmp => _manager;
+    //Worker contructor
+    public Employee(
+        int id, string name, string surname, string pesel, string email,
+        DateTime dayOfBirth, DateTime hireDate,
+        Address address, EmployeeStatus status,
+        IEnumerable<Cinema> cinemas,
+
+        ShiftType shift,
+        WorkType typeOfWork,
+        double hourlyRate
+    )
+    {
+        if (cinemas == null || !cinemas.Any())
+            throw new ArgumentException("Employee must be assigned to at least one cinema.");
+
+        Id = id;
+        Name = name;
+        Surname = surname;
+        PESEL = pesel;
+        Email = email;
+        DayOfBirth = dayOfBirth;
+        HireDate = hireDate;
+        Status = status;
+        Address = address;
+
+        AddEmployee(this);
+        foreach (var c in cinemas)
+            AddCinema(c);
+
+        _worker = new Worker(this, shift, typeOfWork, hourlyRate);
+    }
+    //Manager constructor
+    public Employee(
+        int id, string name, string surname, string pesel, string email,
+        DateTime dayOfBirth, DateTime hireDate,
+        Address address, EmployeeStatus status,
+        IEnumerable<Cinema> cinemas,
+        
+        string department,
+        double baseSalary,
+        double bonusPercentage
+    )
+    {
+        if (cinemas == null || !cinemas.Any())
+            throw new ArgumentException("Employee must be assigned to at least one cinema.");
+
+        Id = id;
+        Name = name;
+        Surname = surname;
+        PESEL = pesel;
+        Email = email;
+        DayOfBirth = dayOfBirth;
+        HireDate = hireDate;
+        Status = status;
+        Address = address;
+
+        AddEmployee(this);
+        foreach (var c in cinemas)
+            AddCinema(c);
+
+        _manager = new Manager(this, department, baseSalary, bonusPercentage);
+    }
+    
+        private void SwitchToManager(
+        string department,
+        double baseSalary,
+        double bonusPercentage)
+    {
+        _worker = null;
+        _manager = new Manager(this, department, baseSalary, bonusPercentage);
+    }
+
+    private void SwitchToWorker(
+        ShiftType shift,
+        WorkType typeOfWork,
+        double hourlyRate)
+    {
+        _manager = null;
+        _worker = new Worker(this, shift, typeOfWork, hourlyRate);
+    }
     
     public static List<Employee> GetEmployees()
     {
@@ -173,34 +257,7 @@ public class Employee
         cinema.RemoveEmployee(this);
     }
 
-    public Employee(
-        int id, string name, string surname, string pesel, string email,
-        DateTime dayOfBirth, DateTime hireDate, double salary,
-        Address address, EmployeeStatus status,
-        IEnumerable<Cinema> cinemas
-    )
-    {
-        if (cinemas == null || !cinemas.Any())
-            throw new ArgumentException("Employee must be assigned to at least one cinema.");
-
-        Id = id;
-        Name = name;
-        Surname = surname;
-        PESEL = pesel;
-        Email = email;
-        DayOfBirth = dayOfBirth;
-        HireDate = hireDate;
-        Salary = salary;
-        Status = status;
-        Address = address;
-
-        AddEmployee(this);
-
-        foreach (var c in cinemas)
-            AddCinema(c);
-    }
-
-    public Employee() { }
+    private Employee() { }
     public static void Save(string path = "employee.xml")
     {
         StreamWriter file = File.CreateText(path);
@@ -246,5 +303,241 @@ public class Employee
         return true;
     }
     
+    private class Worker : IWorker
+    {
+        private readonly Employee _employee;
 
+        private ShiftType _shift;
+        private WorkType _typeOfWork;
+        private int _hoursWorked;
+        private double _hourlyRate;
+
+        public ShiftType Shift
+        {
+            get => _shift;
+            private set => _shift = value;
+        }
+
+        public WorkType TypeOfWork
+        {
+            get => _typeOfWork;
+            private set => _typeOfWork = value;
+        }
+
+        public int HoursWorked
+        {
+            get => _hoursWorked;
+            private set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException(nameof(HoursWorked));
+                _hoursWorked = value;
+            }
+        }
+
+        public double HourlyRate
+        {
+            get => _hourlyRate;
+            private set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(HourlyRate));
+                _hourlyRate = value;
+            }
+        }
+
+        public Worker(
+            Employee employee,
+            ShiftType shift,
+            WorkType typeOfWork,
+            double hourlyRate)
+        {
+            _employee = employee;
+            Shift = shift;
+            TypeOfWork = typeOfWork;
+            HourlyRate = hourlyRate;
+            HoursWorked = 0;
+        }
+
+        public void ChangeToManager(
+            string department,
+            double baseSalary,
+            double bonusPercentage)
+        {
+            _employee.SwitchToManager(department, baseSalary, bonusPercentage);
+        }
+    }
+    
+    private class Manager:IManager
+{
+    private string _department;
+    private double _baseSalary;
+    private double _bonusPercentage;
+    private Employee _employee;
+    public static double MaxSalaryBonus { get; } = 0.35;
+    
+    private Manager _supervisor;
+    private HashSet<Manager> _subordinates = new();  
+
+    public string Department
+    {
+        get => _department;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Department cannot be empty.");
+            _department = value.Trim();
+        }
+    }
+    
+    public double BonusPercentage
+    {
+        get => _bonusPercentage;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentOutOfRangeException(nameof(BonusPercentage), "Bonus percentage must be greater than 0.");
+            _baseSalary = value;
+        }
+    }
+    
+    public double BaseSalary
+    {
+        get => _baseSalary;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentOutOfRangeException(nameof(BaseSalary), "Base salary must be greater than 0.");
+            _baseSalary = value;
+        }
+    }
+
+    public double GetBonus()
+    {
+        double bonus;
+
+        if (_bonusPercentage > MaxSalaryBonus)
+        {
+            Console.WriteLine("The bonus percentage is too large, it's reduced to the maximum.");
+            bonus = BaseSalary * MaxSalaryBonus;
+        }
+        else
+        {
+            bonus = BaseSalary * _bonusPercentage;
+        }
+
+        if (bonus < 0)
+            throw new ArgumentOutOfRangeException(nameof(bonus), "Bonus cannot be negative.");
+
+        return bonus;
+    }
+    
+    public Manager GetSupervisor()
+    {
+        return _supervisor;
+    }
+    public HashSet<Manager> GetSubordinates()
+    {
+        return new HashSet<Manager>(_subordinates);
+    }
+    public void SetSupervisor(Manager supervisor)
+    {
+        if (supervisor == this)
+            throw new InvalidOperationException("A manager cannot supervise themselves.");
+
+        if (supervisor == null)
+        {
+            if (_supervisor != null)
+                _supervisor.RemoveSubordinateInternal(this);
+
+            _supervisor = null;
+            return;
+        }
+        
+        if (_supervisor == supervisor)
+            throw new InvalidOperationException("This manager is already supervised by that manager.");
+        
+        if (_supervisor != null)
+            _supervisor.RemoveSubordinateInternal(this);
+
+        _supervisor = supervisor;
+        supervisor.AddSubordinateInternal(this);
+    }
+    
+    public void AddSubordinate(Manager subordinate)
+    {
+        if (subordinate == null)
+            throw new ArgumentException("Subordinate cannot be null.");
+
+        if (subordinate == this)
+            throw new InvalidOperationException("A manager cannot be their own subordinate.");
+
+        if (_subordinates.Contains(subordinate))
+            throw new InvalidOperationException("This manager already supervises the subordinate.");
+
+        _subordinates.Add(subordinate);
+
+        subordinate.SetSupervisorInternal(this);
+    }
+    public void RemoveSubordinate(Manager subordinate)
+    {
+        if (subordinate == null)
+            throw new ArgumentException("Subordinate cannot be null.");
+
+        if (!_subordinates.Contains(subordinate))
+            throw new InvalidOperationException("This subordinate is not supervised by this manager.");
+
+        _subordinates.Remove(subordinate);
+
+        subordinate.RemoveSupervisorInternal(this);
+    }
+    internal void AddSubordinateInternal(Manager subordinate)
+    {
+        _subordinates.Add(subordinate);
+    }
+
+    internal void RemoveSubordinateInternal(Manager subordinate)
+    {
+        _subordinates.Remove(subordinate);
+    }
+
+    internal void SetSupervisorInternal(Manager supervisor)
+    {
+        _supervisor = supervisor;
+    }
+
+    internal void RemoveSupervisorInternal(Manager supervisor)
+    {
+        if (_supervisor == supervisor)
+            _supervisor = null;
+    }
+    
+    public Manager(Employee employee, string department, double baseSalary, double bonusPercentage)
+    {
+        Department = department;
+        BaseSalary = baseSalary;
+        BonusPercentage = bonusPercentage;
+        _employee = employee;
+    }
+    public Manager Supervisor
+    {
+        get => _supervisor;
+        set => _supervisor = value;
+    }
+    
+    public List<Manager> Subordinates
+    {
+        get => _subordinates.ToList();
+        set => _subordinates = value != null ? new HashSet<Manager>(value) : new HashSet<Manager>();
+    }
+    private Manager(){}
+    
+    public void ChangeToWorker(
+        ShiftType shift,
+        WorkType typeOfWork,
+        double hourlyRate)
+    {
+        _employee.SwitchToWorker(shift, typeOfWork, hourlyRate);
+    }
+}
 }
