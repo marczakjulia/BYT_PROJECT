@@ -90,4 +90,5 @@ public class MovieGenreCompositionTests
 
         Assert.That(movie.GetComedy(), Is.EqualTo(comedy));
     }
+    
 }
